@@ -11,6 +11,7 @@ import twint
 import pandas as pd
 import numpy as np
 import argparse
+import unicodedata
 
 def get_tweets_for_handle(df, csv_row):
     print("--------------------------")
@@ -47,11 +48,13 @@ def get_tweets(args):
         row = row.reset_index(drop=True)
         if row.loc[0, "Multiple"] == 0:
             df = get_tweets_for_handle(df, row)
+            df.to_csv(args.output_file, index=False)
         else:
             handles =row.loc[0, "Twitter Handle"].split(",")
             for handle in handles:
                 row.loc[0, "Twitter Handle"] = handle.strip()
                 df = get_tweets_for_handle(df, row)
+                df.to_csv(args.output_file, index=False)
     
     df.to_csv(args.output_file, index=False)
     
