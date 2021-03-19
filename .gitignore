@@ -1,0 +1,7 @@
+# Ignore all csv files
+*.csv
+
+# Ignore notebook configuration folder
+.ipynb_checkpoints
+
+# Ignore OS specific files
