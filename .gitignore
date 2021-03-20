@@ -4,4 +4,7 @@
 # Ignore notebook configuration folder
 .ipynb_checkpoints
 
+# Ignore data dumps
+*.joblib
+
 # Ignore OS specific files
