@@ -7,4 +7,7 @@
 # Ignore data dumps
 *.joblib
 
+# Ignore zip files
+*.zip
+
 # Ignore OS specific files
