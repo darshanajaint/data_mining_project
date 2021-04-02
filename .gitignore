@@ -10,4 +10,7 @@
 # Ignore zip files
 *.zip
 
-# Ignore OS specific files
+# Ignore PyCharm files
+.idea
+*.xml
+*.iml
