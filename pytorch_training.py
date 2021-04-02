@@ -38,6 +38,7 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
     if metrics_path == "":
         metrics_path = "./gru_metrics/gru_metrics"
 
+    print("Starting training...")
     for epoch in range(num_epochs):
         model.train()
         train_loss_epoch = 0
