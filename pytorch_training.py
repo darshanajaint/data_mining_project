@@ -21,7 +21,9 @@ https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
 
 
-def train(model, train_iterator, val_iterator, num_epochs, device):
+def train(model, train_iterator, val_iterator, num_epochs, device,
+          model_path="", metrics_path=""):
+
     criterion = BCEWithLogitsLoss()
     optimizer = optim.Adam(params=model.parameters())
 
@@ -30,6 +32,11 @@ def train(model, train_iterator, val_iterator, num_epochs, device):
 
     min_loss = float("inf")
     min_epoch = -1
+
+    if model_path == "":
+        model_path = "./gru_models/gru_model"
+    if metrics_path == "":
+        metrics_path = "./gru_metrics/gru_metrics"
 
     for epoch in range(num_epochs):
         model.train()
@@ -59,10 +66,10 @@ def train(model, train_iterator, val_iterator, num_epochs, device):
             min_epoch = epoch
 
         # Save trained model
-        save_model("./gru_models/gru_model_epoch_{:d}.pt".format(epoch),
-                   model, optimizer)
-        save_metrics("./gru_metrics/gru_metrics_epoch_{:d}.pt".format(epoch),
-                     0, 0, train_loss_epoch, val_loss_epoch)
+        save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
+                   optimizer)
+        save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), 0, 0,
+                     train_loss_epoch, val_loss_epoch)
 
         print("Finished epoch {:d}\n"
               "\tTotal training loss: {:.6f}\n"
