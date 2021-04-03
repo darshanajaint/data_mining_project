@@ -37,3 +37,18 @@ class GRUModel(nn.Module):
         output = torch.squeeze(output, 1)
 
         return output
+
+    def load_model(self, path):
+        self.load_state_dict(torch.load(path))
+
+    def save_model(self, path):
+        torch.save(self.state_dict(), path)
+
+    def predict(self, data):
+        pass
+
+    def predict_prob(self, data):
+        pass
+
+    def fit(self, train, val=None):
+        pass

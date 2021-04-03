@@ -2,6 +2,7 @@ import torch
 import torch.backends.cudnn
 import pandas as pd
 import torchtext.data as data
+import pickle
 
 from torchtext.legacy import data
 
@@ -22,33 +23,34 @@ class DataFrameDataset(data.Dataset):
         return self.examples[i]
 
 
-def load_data(file_name, max_vocab_size, batch_size, device):
-    df = pd.read_csv(file_name)
-
-    df = df[["stemmed", "Party"]]
-    df.loc[df["Party"] == "Independent", "Party"] = "Democrat"
-
-    le = LabelEncoder()
-    df["Party"] = le.fit_transform(df["Party"].values)
-
-    train_df, valid_df = train_test_split(df, test_size=0.1)
+def load_data(file_name, max_vocab_size, batch_size, device, build_vocab=True,
+              text_vocab_path="./text_vocab.pickle",
+              label_vocab_path="./label_vocab.pickle"):
+    train_df, valid_df = read_csv(file_name)
 
     SEED = 0
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    TEXT = data.Field(tokenize="spacy")  # , include_lengths=True)
+    TEXT = data.Field(tokenize="spacy")
     LABEL = data.LabelField(dtype=torch.float)
     fields = [("text", TEXT), ("label", LABEL)]
 
     train_ds = DataFrameDataset(train_df, fields)
     val_ds = DataFrameDataset(valid_df, fields)
 
-    TEXT.build_vocab(train_ds, max_size=max_vocab_size,
-                     vectors="glove.6B.200d",
-                     unk_init=torch.Tensor.zero_)
-    LABEL.build_vocab(train_ds)
+    if build_vocab:
+        TEXT.build_vocab(train_ds, max_size=max_vocab_size,
+                         vectors="glove.6B.200d",
+                         unk_init=torch.Tensor.zero_)
+        LABEL.build_vocab(train_ds)
+
+        save_vocab(TEXT.vocab, text_vocab_path)
+        save_vocab(LABEL.vocab, label_vocab_path)
+    else:
+        load_vocab(text_vocab_path, TEXT)
+        load_vocab(label_vocab_path, LABEL)
 
     train_iterator, val_iterator = data.BucketIterator.splits(
         # Datasets for iterator to draw data from
@@ -73,3 +75,25 @@ def load_data(file_name, max_vocab_size, batch_size, device):
     )
 
     return train_iterator, val_iterator, TEXT, LABEL
+
+
+def read_csv(file):
+    df = pd.read_csv(file)
+
+    df = df[["stemmed", "Party"]]
+    df.loc[df["Party"] == "Independent", "Party"] = "Democrat"
+
+    le = LabelEncoder()
+    df["Party"] = le.fit_transform(df["Party"].values)
+
+    return train_test_split(df, test_size=0.1)
+
+
+def save_vocab(vocab, path):
+    with open(path, "wb") as output:
+        pickle.dump(vocab, output)
+
+
+def load_vocab(path, field):
+    with open(path, "r") as file:
+        field.vocab = pickle.load(file)

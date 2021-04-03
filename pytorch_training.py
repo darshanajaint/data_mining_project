@@ -9,12 +9,12 @@ Created on Sat Mar 27 11:48:56 2021
 from torch.nn import BCEWithLogitsLoss
 import torch.optim as optim
 import argparse
+import numpy as np
 
 from GRUModel import GRUModel
 from data_util import *
 from util import save_model, save_metrics
-
-import time
+from sklearn.metrics import accuracy_score
 
 """
 Other packages to download
@@ -31,6 +31,11 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
     training_loss = []
     validation_loss = []
 
+    training_accuracy = []
+    validation_accuracy = []
+
+    train_labels = get_labels(train_iterator, device)
+
     min_loss = float("inf")
     min_epoch = -1
 
@@ -44,7 +49,7 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
         model.train()
         train_loss_epoch = 0
 
-        start = time.time()
+        train_predictions = []
         for batch in train_iterator:
             text = batch.text.to(device)
             label = batch.label.to(device)
@@ -55,37 +60,40 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
             loss.backward()
             optimizer.step()
 
+            train_predictions.append(output.numpy())
+
             train_loss_epoch += loss.item()
 
+        train_acc_epoch = accuracy_score(train_labels, train_predictions)
+
         training_loss.append(train_loss_epoch)
+        training_accuracy.append(train_acc_epoch)
 
-        end = time.time()
-        print("Epoch {:d}".format(epoch))
-        print("\tTraining time: {:.6f}s".format(epoch, end - start))
-
-        # want to evaluate on validation set after we've trained on all
-        # training data that's available (i.e. all batches)
-        start = time.time()
-        val_loss_epoch = evaluate(val_iterator, model, criterion, device)
+        val_loss_epoch, val_acc_epoch = evaluate(val_iterator, model,
+                                                 criterion, device)
         validation_loss.append(val_loss_epoch)
-        end = time.time()
-        print("\tValidation time: {:.6f}s".format(epoch, end - start))
+        validation_accuracy.append(val_acc_epoch)
 
         # Keep track of epoch with minimum validation loss
         if val_loss_epoch < min_loss:
             min_loss = val_loss_epoch
             min_epoch = epoch
 
-        # Save trained model
-        save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
-                   optimizer)
-        save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch, 0, 0,
-                     train_loss_epoch, val_loss_epoch)
+            # Save best model so far
+            save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
+                       optimizer)
+            save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch, 0, 0,
+                         train_loss_epoch, val_loss_epoch)
+
+        # Compute training and validation accuracies.
 
         print("Finished epoch {:d}\n"
+              "\tTraining accuracy: {:.6f}"
+              "\tValidation accuracy: {:.6f}"
               "\tTotal training loss: {:.6f}\n"
               "\tTotal validation loss: {:.6f}"
-              .format(epoch, train_loss_epoch, val_loss_epoch))
+              .format(epoch, train_acc_epoch, val_acc_epoch, train_loss_epoch,
+                      val_loss_epoch))
 
     print("Finished training!\n"
           "\tBest validation loss achieved after epoch: {:d}\n"
@@ -95,6 +103,9 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
 def evaluate(data_loader, model, criterion, device):
     model.eval()
 
+    true_labels = get_labels(data_loader, device)
+
+    predictions = []
     loss = 0
     with torch.no_grad():
         for batch in data_loader:
@@ -104,7 +115,20 @@ def evaluate(data_loader, model, criterion, device):
             output = model(text)
             loss += criterion(output, labels).item()
 
-    return loss
+            predictions.append(output.numpy())
+
+    predictions = np.asarray(predictions)
+    accuracy = accuracy_score(true_labels, predictions)
+
+    return loss, accuracy
+
+
+def get_labels(iterator, device):
+    labels = []
+    for batch in iterator:
+        label = batch.label.to(device)
+        labels.append(label.numpy())
+    return np.asarray(labels)
 
 
 def str2bool(arg):
@@ -140,19 +164,37 @@ def main():
     parser.add_argument('--bidirectional', type=str2bool,
                         help='True if GRU should be bidirectional, False '
                              'otherwise')
+    parser.add_argument('--build_vocab', type=bool,
+                        help='Whether to build vocab from train set or to use '
+                             'prebuilt vocab. If False, ensure the '
+                             'files with the text and label vocab exist and '
+                             'are specified under their respective tags. '
+                             'Default True.',
+                        default=True)
+    parser.add_argument('--text_vocab_path', type=str,
+                        help='Path where text vocab will be saved (if built '
+                             'from data set) or loaded from. Default ' 
+                             './text_vocab.pickle.',
+                        default='./text_vocab.pickle')
+    parser.add_argument('--label_vocab_path', type=str,
+                        help='Path where label vocab will be saved (if built '
+                             'from data set) or loaded from. Default '
+                             './label_vocab.pickle.',
+                        default='./label_vocab.pickle')
 
     args = parser.parse_args()
-    for arg in vars(args):
-        print(arg, getattr(args, arg))
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    start = time.time()
-    train_iter, val_iter, TEXT, _ = load_data(args.train_csv,
-                                              args.max_vocab_size,
-                                              args.batch_size, device)
-    end = time.time()
-    print("Time to load data: {:.6f}".format(end - start))
+    train_iter, val_iter, TEXT, _ = load_data(
+        args.train_csv,
+        args.max_vocab_size,
+        args.batch_size,
+        device,
+        build_vocab=args.build_vocab,
+        text_vocab_path=args.text_vocab_path,
+        label_vocab_path=args.label_vocab_path
+    )
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
