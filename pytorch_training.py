@@ -145,7 +145,7 @@ def main():
                      num_classes=2, text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
 
-    train(model, train_iter, val_iter, args.num_epochs, device)
+    train(model, train_iter, val_iter, args.epochs, device)
 
 
 if __name__ == "__main__":
