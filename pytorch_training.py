@@ -61,9 +61,11 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
             optimizer.step()
 
             train_loss_epoch += loss.item()
-            train_predictions.append(output.detach().cpu().numpy())
+            train_predictions += list(output.detach().cpu().numpy())
 
         train_predictions = np.asarray(train_predictions, dtype=object)
+        print("Train pred shape:", train_predictions.shape)
+        print("Train labels shape:", train_labels.shape)
         train_acc_epoch = accuracy_score(train_labels, train_predictions)
 
         training_loss.append(train_loss_epoch)
@@ -116,7 +118,7 @@ def evaluate(data_loader, model, criterion, device):
             output = model(text)
             loss += criterion(output, labels).item()
 
-            predictions.append(output.cpu().numpy())
+            predictions += list(output.cpu().numpy())
 
     predictions = np.asarray(predictions, dtype=object)
     accuracy = accuracy_score(true_labels, predictions)
@@ -128,7 +130,7 @@ def get_labels(iterator, device):
     labels = []
     for batch in iterator:
         label = batch.label.to(device)
-        labels.append(label.cpu().numpy())
+        labels += list(label.cpu().numpy())
     return np.asarray(labels)
 
 
