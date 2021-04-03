@@ -161,6 +161,8 @@ def main():
                      text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
 
+    model.to(device)
+
     train(model, train_iter, val_iter, args.epochs, device)
 
 
