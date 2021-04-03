@@ -19,6 +19,7 @@ class GRUModel(nn.Module):
 
     def forward(self, text):
         text_embedded = self.embedding(text)
+        print(text_embedded.size())
         # text_embedded shape: [sentence length, batch size, embedding dim]
 
         # output shape: (seq_len, batch, num_directions * hidden_size)
