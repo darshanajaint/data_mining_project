@@ -82,8 +82,9 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
             # Save best model so far
             save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
                        optimizer)
-            save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch, 0, 0,
-                         train_loss_epoch, val_loss_epoch)
+            save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch,
+                         train_acc_epoch, val_acc_epoch, train_loss_epoch,
+                         val_loss_epoch)
 
         # Compute training and validation accuracies.
 
