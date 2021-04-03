@@ -60,9 +60,8 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
             loss.backward()
             optimizer.step()
 
-            train_predictions.append(output.cpu().numpy())
-
             train_loss_epoch += loss.item()
+            train_predictions.append(output.detach().cpu().numpy())
 
         train_acc_epoch = accuracy_score(train_labels, train_predictions)
 
@@ -116,7 +115,7 @@ def evaluate(data_loader, model, criterion, device):
             output = model(text)
             loss += criterion(output, labels).item()
 
-            predictions.append(output.detach().cpu().numpy())
+            predictions.append(output.cpu().numpy())
 
     predictions = np.asarray(predictions)
     accuracy = accuracy_score(true_labels, predictions)
