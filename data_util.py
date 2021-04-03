@@ -38,7 +38,7 @@ def load_data(file_name, max_vocab_size, batch_size, device):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-    TEXT = data.Field(tokenize="spacy", include_lengths=True)
+    TEXT = data.Field(tokenize="spacy")  # , include_lengths=True)
     LABEL = data.LabelField(dtype=torch.float)
     fields = [("text", TEXT), ("label", LABEL)]
 
