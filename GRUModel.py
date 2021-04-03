@@ -18,7 +18,7 @@ class GRUModel(nn.Module):
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, text):
-        text_embedded = self.embedding(text)
+        text_embedded = self.embedding(text[1])
         print(text_embedded.size())
         # text_embedded shape: [sentence length, batch size, embedding dim]
 
