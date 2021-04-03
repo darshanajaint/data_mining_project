@@ -60,7 +60,8 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
         training_loss.append(train_loss_epoch)
 
         end = time.time()
-        print("Epoch {:d} took {:.6f}s to train.".format(epoch, end - start))
+        print("Epoch {:d}".format(epoch))
+        print("\tTraining time: {:.6f}s".format(epoch, end - start))
 
         # want to evaluate on validation set after we've trained on all
         # training data that's available (i.e. all batches)
@@ -68,12 +69,15 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
         val_loss_epoch = evaluate(val_iterator, model, criterion, device)
         validation_loss.append(val_loss_epoch)
         end = time.time()
-        print("Epoch {:d} took {:.6f}s to validate.".format(epoch, end - start))
+        print("\tValidation time: {:.6f}s".format(epoch, end - start))
 
         # Keep track of epoch with minimum validation loss
         if val_loss_epoch < min_loss:
             min_loss = val_loss_epoch
             min_epoch = epoch
+
+        print("\tTraining loss: {:.6f}".format(train_loss_epoch))
+        print("\tValidation loss: {:.6f}".format(val_loss_epoch))
 
         # Save trained model
         save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
