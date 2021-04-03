@@ -116,7 +116,7 @@ def evaluate(data_loader, model, criterion, device):
             output = model(text)
             loss += criterion(output, labels).item()
 
-            predictions.append(output.cpu().numpy())
+            predictions.append(output.detach().cpu().numpy())
 
     predictions = np.asarray(predictions)
     accuracy = accuracy_score(true_labels, predictions)
