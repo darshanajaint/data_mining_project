@@ -32,9 +32,15 @@ class GRUModel(nn.Module):
         else:
             output = hidden
 
+        print("Input into FC:", output.shape)
         output = self.fc(output)
+
+        print("Input into Dropout:", output.shape)
         output = self.dropout(output)
 
+        print("Input into squeeze:", output.shape)
         output = torch.squeeze(output, 1)
+
+        print("Final output:", output.shape)
 
         return output
