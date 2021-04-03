@@ -92,7 +92,7 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
 
     print("Finished training!\n"
           "\tBest validation loss achieved after epoch: {:d}\n"
-          "\tMin validation loss: {.6f}".format(min_epoch, min_loss))
+          "\tMin validation loss: {:.6f}".format(min_epoch, min_loss))
 
 
 def evaluate(data_loader, model, criterion, device):
