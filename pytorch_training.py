@@ -154,7 +154,7 @@ def main():
     print("Time to load data: {:.6f}".format(end - start))
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
-                     num_classes=2, text_field=TEXT, dropout=args.dropout,
+                     text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
 
     train(model, train_iter, val_iter, args.epochs, device)
