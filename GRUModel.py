@@ -14,7 +14,7 @@ class GRUModel(nn.Module):
         self.rnn = nn.GRU(input_size, hidden_size, batch_first=False,
                           bidirectional=bidirectional)
         self.fc = nn.Linear(hidden_size * (2 if self.bidirectional else 1),
-                            num_classes)
+                            1)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, text):
