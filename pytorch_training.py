@@ -46,10 +46,10 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
 
         start = time.time()
         for batch in train_iterator:
-            text = batch.text[1].to(device)
+            text, textlengths = batch.text
             labels = batch.label[1].to(device)
 
-            output = model(batch.text)
+            output = model(text, textlengths)
             loss = criterion(output, batch.label)
             optimizer.zero_grad()
             loss.backward()
