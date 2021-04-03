@@ -1,4 +1,5 @@
 import torch
+import torch.backends.cudnn
 import pandas as pd
 import torchtext.data as data
 

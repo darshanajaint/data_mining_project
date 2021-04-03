@@ -14,6 +14,8 @@ from GRUModel import GRUModel
 from data_util import *
 from util import save_model, save_metrics
 
+import time
+
 """
 Other packages to download
 https://pypi.org/project/spacy-pytorch-transformers/
@@ -23,7 +25,6 @@ https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 
 def train(model, train_iterator, val_iterator, num_epochs, device,
           model_path="", metrics_path=""):
-
     criterion = BCEWithLogitsLoss()
     optimizer = optim.Adam(params=model.parameters())
 
@@ -42,6 +43,8 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
     for epoch in range(num_epochs):
         model.train()
         train_loss_epoch = 0
+
+        start = time.time()
         for batch in train_iterator:
             text = batch.text.to(device)
             labels = batch.label.to(device)
@@ -56,10 +59,16 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
 
         training_loss.append(train_loss_epoch)
 
+        end = time.time()
+        print("Epoch {:d} took {:.6f}s to train.".format(epoch, end - start))
+
         # want to evaluate on validation set after we've trained on all
         # training data that's available (i.e. all batches)
-        val_loss_epoch = evaluate(val_iterator, model, device)
+        start = time.time()
+        val_loss_epoch = evaluate(val_iterator, model, criterion, device)
         validation_loss.append(val_loss_epoch)
+        end = time.time()
+        print("Epoch {:d} took {:.6f}s to validate.".format(epoch, end - start))
 
         # Keep track of epoch with minimum validation loss
         if val_loss_epoch < min_loss:
@@ -69,25 +78,25 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
         # Save trained model
         save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
                    optimizer)
-        save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), 0, 0,
+        save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch, 0, 0,
                      train_loss_epoch, val_loss_epoch)
 
         print("Finished epoch {:d}\n"
               "\tTotal training loss: {:.6f}\n"
               "\tTotal validation loss: {:.6f}"
-              .format(epoch, train_loss_epoch,val_loss_epoch))
+              .format(epoch, train_loss_epoch, val_loss_epoch))
 
     print("Finished training!\n"
           "\tBest validation loss achieved after epoch: {:d}\n"
           "\tMin validation loss: {.6f}".format(min_epoch, min_loss))
 
 
-def evaluate(data, model, criterion, device):
+def evaluate(data_loader, model, criterion, device):
     model.eval()
 
     loss = 0
     with torch.no_grad():
-        for batch in data:
+        for batch in data_loader:
             text = batch.text.to(device)
             labels = batch.label.to(device)
 
@@ -137,9 +146,12 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    start = time.time()
     train_iter, val_iter, TEXT, _ = load_data(args.train_csv,
                                               args.max_vocab_size,
                                               args.batch_size, device)
+    end = time.time()
+    print("Time to load data: {:.6f}".format(end - start))
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      num_classes=2, text_field=TEXT, dropout=args.dropout,

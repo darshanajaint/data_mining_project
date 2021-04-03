@@ -29,5 +29,3 @@ def save_metrics(path, epoch, train_acc, val_acc, train_loss, val_loss):
 
 def load_metrics(path):
     return torch.load(path)
-
-
