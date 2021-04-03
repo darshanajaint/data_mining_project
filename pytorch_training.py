@@ -76,9 +76,6 @@ def train(model, train_iterator, val_iterator, num_epochs, device,
             min_loss = val_loss_epoch
             min_epoch = epoch
 
-        print("\tTraining loss: {:.6f}".format(train_loss_epoch))
-        print("\tValidation loss: {:.6f}".format(val_loss_epoch))
-
         # Save trained model
         save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
                    optimizer)
