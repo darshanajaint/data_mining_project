@@ -12,7 +12,6 @@ from sklearn.model_selection import train_test_split
 class DataFrameDataset(data.Dataset):
     def __init__(self, df, fields):
         self.examples = []
-        print(df)
         for i, row in df.iterrows():
             label = row["Party"]
             text = row["stemmed"]
