@@ -64,6 +64,9 @@ def main():
     parser.add_argument('--validation', type=str2bool,
                         help='Whether to train with validation data or not. '
                              'Default True.', default=True)
+    parser.add_argument('--save_final_model', type=str2bool,
+                        help='Whether to save the final model during '
+                             'training. Default False.', default=False)
 
     args = parser.parse_args()
 
@@ -84,7 +87,8 @@ def main():
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    model.fit(training_data, args.epochs, args.validation)
+    model.fit(training_data, args.epochs, args.validation,
+              args.save_final_model)
 
 
 if __name__ == "__main__":

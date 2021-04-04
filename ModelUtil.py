@@ -104,7 +104,7 @@ class ModelUtil:
                 loss += self.criterion(output, labels).item()
         return loss
 
-    def fit(self, data, num_epochs, validation=False):
+    def fit(self, data, num_epochs, validation=False, save_final=False):
 
         (train_iterator, training_loss, training_accuracy), \
             (val_iterator, validation_loss, validation_accuracy) = \
@@ -179,3 +179,6 @@ class ModelUtil:
                   "\tTraining loss: {:.6f}\n"
                   "\tTraining accuracy: {:.6f}"
                   .format(min_epoch, min_loss, training_accuracy[min_epoch]))
+
+        if save_final:
+            self.save_model(self.model_path + "_final_model.pt")
