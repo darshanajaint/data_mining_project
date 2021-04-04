@@ -48,7 +48,7 @@ def get_data_iterator(dataframe, fields, batch_size, device):
         device=device,
         sort_key=lambda x: len(x.text),
         sort=False,
-        shuffle=True,
+        # shuffle=True,
         sort_within_batch=True,
     )
     return iterator, dataset
