@@ -31,10 +31,8 @@ class GRUModel(nn.Module):
         else:
             output = output[-1, :, :]
 
-        print(output.size())
         output = self.fc(output)
         output = self.dropout(output)
         output = torch.squeeze(output, 1)
-        print(output.size())
 
         return output
