@@ -8,9 +8,8 @@ from util import get_labels
 from sklearn.metrics import accuracy_score
 
 from data_util import DataFrameDataset
-'''
 from torchtext.legacy import data
-'''
+
 
 class ModelUtil:
 
