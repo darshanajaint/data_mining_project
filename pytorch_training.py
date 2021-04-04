@@ -23,10 +23,11 @@ https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
 
 
-def train(model, train_iterator, val_iterator, num_epochs, device,
-          model_path="", metrics_path=""):
+def train(model, train_iterator, val_iterator, num_epochs, learning_rate,
+          device, model_path="", metrics_path=""):
     criterion = BCEWithLogitsLoss()
-    optimizer = optim.Adam(params=model.parameters())
+    optimizer = optim.Adam(params=model.parameters(),
+                           learning_rate=learning_rate)
 
     training_loss = []
     validation_loss = []
@@ -189,7 +190,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_iter, val_iter, TEXT, _ = load_data(
+    train_iter, val_iter, fields, TEXT, LABEL = load_train_val_data(
         args.train_csv,
         args.max_vocab_size,
         args.batch_size,

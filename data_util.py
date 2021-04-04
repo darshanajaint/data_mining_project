@@ -23,11 +23,20 @@ class DataFrameDataset(data.Dataset):
         return self.examples[i]
 
 
-def load_data(file_name, max_vocab_size, batch_size, device, build_vocab=True,
-              text_vocab_path="./text_vocab.pickle",
-              label_vocab_path="./label_vocab.pickle"):
-    train_df, valid_df = read_csv(file_name)
+def get_data_iterator(dataframe, fields, batch_size, device):
+    dataset = DataFrameDataset(dataframe, fields)
+    return data.BucketIterator.splits(
+        dataset,
+        batch_size=batch_size,
+        device=device,
+        sort_key=lambda x: len(x.text),
+        sort=False,
+        shuffle=True,
+        sort_within_batch=True,
+    ), dataset
 
+
+def create_fields():
     SEED = 0
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
@@ -35,49 +44,45 @@ def load_data(file_name, max_vocab_size, batch_size, device, build_vocab=True,
 
     TEXT = data.Field(tokenize="spacy")
     LABEL = data.LabelField(dtype=torch.float)
+
     fields = [("text", TEXT), ("label", LABEL)]
+    return fields, TEXT, LABEL
 
-    train_ds = DataFrameDataset(train_df, fields)
-    val_ds = DataFrameDataset(valid_df, fields)
 
+def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
+              text_vocab_path='./text_vocab.pickle',
+              label_vocab_path='./label_vocab.pickle'):
     if build_vocab:
-        TEXT.build_vocab(train_ds, max_size=max_vocab_size,
+        text.build_vocab(dataset, max_size=max_vocab_size,
                          vectors="glove.6B.200d",
                          unk_init=torch.Tensor.zero_)
-        LABEL.build_vocab(train_ds)
+        label.build_vocab(dataset)
 
-        save_vocab(TEXT.vocab, text_vocab_path)
-        save_vocab(LABEL.vocab, label_vocab_path)
+        save_vocab(text.vocab, text_vocab_path)
+        save_vocab(label.vocab, label_vocab_path)
     else:
-        load_vocab(text_vocab_path, TEXT)
-        load_vocab(label_vocab_path, LABEL)
-
-    train_iterator, val_iterator = data.BucketIterator.splits(
-        # Datasets for iterator to draw data from
-        (train_ds, val_ds),
-
-        # Tuple of train and validation batch sizes.
-        batch_sizes=(batch_size, batch_size),
-
-        # Device to load batches on.
-        device=device,
-
-        sort_key=lambda x: len(x.text),
-
-        # Sort all examples in data using `sort_key`.
-        sort=False,
-
-        # Shuffle data on each epoch run.
-        shuffle=True,
-
-        # Use `sort_key` to sort examples in each batch.
-        sort_within_batch=True,
-    )
-
-    return train_iterator, val_iterator, TEXT, LABEL
+        load_vocab(text_vocab_path, text)
+        load_vocab(label_vocab_path, label)
 
 
-def read_csv(file):
+def load_train_val_data(file_name, max_vocab_size, batch_size, device,
+                        build_vocab=True, text_vocab_path="./text_vocab.pickle",
+                        label_vocab_path="./label_vocab.pickle"):
+    train_df, valid_df = read_csv(file_name)
+
+    fields, TEXT, LABEL = create_fields()
+
+    train_iter, train_ds = get_data_iterator(train_df, fields, batch_size,
+                                             device)
+    val_iter, _ = get_data_iterator(valid_df, fields, batch_size, device)
+
+    set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
+              text_vocab_path, label_vocab_path)
+
+    return train_iter, val_iter, [fields, TEXT, LABEL]
+
+
+def read_csv(file, train_val_split=False):
     df = pd.read_csv(file)
 
     df = df[["stemmed", "Party"]]
@@ -86,7 +91,10 @@ def read_csv(file):
     le = LabelEncoder()
     df["Party"] = le.fit_transform(df["Party"].values)
 
-    return train_test_split(df, test_size=0.1)
+    if train_val_split:
+        return train_test_split(df, test_size=0.1)
+    else:
+        return df
 
 
 def save_vocab(vocab, path):

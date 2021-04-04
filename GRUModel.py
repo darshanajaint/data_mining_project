@@ -9,6 +9,7 @@ class GRUModel(nn.Module):
 
         self.hidden_size = hidden_size
         self.bidirectional = bidirectional
+        self.predict = False
 
         self.embedding = nn.Embedding(len(text_field.vocab), input_size)
         self.rnn = nn.GRU(input_size, hidden_size, batch_first=False,
@@ -37,18 +38,3 @@ class GRUModel(nn.Module):
         output = torch.squeeze(output, 1)
 
         return output
-
-    def load_model(self, path):
-        self.load_state_dict(torch.load(path))
-
-    def save_model(self, path):
-        torch.save(self.state_dict(), path)
-
-    def predict(self, data):
-        pass
-
-    def predict_prob(self, data):
-        pass
-
-    def fit(self, train, val=None):
-        pass
