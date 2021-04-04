@@ -83,7 +83,9 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    fields, TEXT, _ = setup_fields(args.train_csv,args.max_vocab_size)
+    train_df, valid_df = read_csv(args.train_csv, train_val_split=True)
+
+    fields, TEXT, _ = setup_fields(train_df, args.max_vocab_size)
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
@@ -94,8 +96,6 @@ def main():
 
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
-
-    train_df, valid_df = read_csv(args.train_csv, train_val_split=True)
 
     model.fit(train_df, args.epochs, valid_df)
 

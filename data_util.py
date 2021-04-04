@@ -40,18 +40,19 @@ def read_csv(file, train_val_split=False):
         return df
 
 
-def get_data_iterator(dataframe, fields, batch_size, device):
-    dataset = DataFrameDataset(dataframe, fields)
+def get_data_iterator(train, val, fields, batch_size, device):
+    train_ds = DataFrameDataset(train, fields)
+    val_ds = DataFrameDataset(val, fields)
     iterator = data.BucketIterator.splits(
-        dataset,
+        (train_ds, val_ds),
         batch_size=batch_size,
         device=device,
         sort_key=lambda x: len(x.text),
         sort=False,
-        # shuffle=True,
+        shuffle=True,
         sort_within_batch=True,
     )
-    return iterator, dataset
+    return iterator
 
 
 def create_fields():
@@ -73,12 +74,11 @@ def set_vocab(text, label, dataset, max_vocab_size):
     label.build_vocab(dataset)
 
 
-def setup_fields(file_name, max_vocab_size):
-    train_df, _ = read_csv(file_name, True)
+def setup_fields(dataframe, max_vocab_size):
 
     fields, TEXT, LABEL = create_fields()
 
-    train_ds = DataFrameDataset(train_df, fields)
+    train_ds = DataFrameDataset(dataframe, fields)
     set_vocab(TEXT, LABEL, train_ds, max_vocab_size)
 
     return fields, TEXT, LABEL
