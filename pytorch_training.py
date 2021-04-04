@@ -84,7 +84,7 @@ def main():
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    model.fit(data, args.epochs, args.validation)
+    model.fit(training_data, args.epochs, args.validation)
 
 
 if __name__ == "__main__":
