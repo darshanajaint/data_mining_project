@@ -145,6 +145,15 @@ class ModelUtil:
             train_loss_epoch = 0
             loop_num = 0
             for batch in train_iterator:
+                iter = 0
+                for item in batch:
+                    print("Here's the next item:")
+                    print(item)
+                    print(item.text)
+                    print(item.label)
+                    iter += 1
+
+                print(iter)
                 # text = batch.text.to(self.device)
                 # label = batch.label.to(self.device)
 
@@ -156,7 +165,6 @@ class ModelUtil:
 
                 train_loss_epoch += loss.item()
                 loop_num += 1
-                print(loop_num)
 
             training_loss.append(train_loss_epoch)
             training_acc_epoch = self._accuracy(train_iterator)
