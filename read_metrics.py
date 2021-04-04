@@ -68,7 +68,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     metrics = read_file(args.metrics)
-    print(metrics)
 
     if args.training:
         plot_training_data(metrics, args.validation)
