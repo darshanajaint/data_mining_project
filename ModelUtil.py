@@ -4,6 +4,8 @@ from torch.nn import BCEWithLogitsLoss
 from data_util import get_data_iterator
 from util import get_labels
 from sklearn.metrics import accuracy_score
+from data_util import DataFrameDataset
+from torchtext.legacy import data
 
 
 class ModelUtil:
@@ -112,6 +114,19 @@ class ModelUtil:
         val_iterator, validation_loss, validation_accuracy = \
             self._set_up_train_vars(val)
 
+        train_ds = DataFrameDataset(train, self.fields)
+        val_ds = DataFrameDataset(val, self.fields)
+
+        train_iterator, val_iterator = data.BucketIterator.splits(
+            (train_ds, val_ds),
+            batch_sizes=(self.batch_size, self.batch_size),
+            device=self.device,
+            sort_key=lambda x: len(x.text),
+            sort=False,
+            shuffle=True,
+            sort_within_batch=True,
+        )
+
         min_loss = float("inf")
         min_epoch = -1
 
@@ -119,17 +134,19 @@ class ModelUtil:
         for epoch in range(num_epochs):
             self.model.train()
             train_loss_epoch = 0
+            loop_num = 0
             for batch in train_iterator:
                 text = batch.text.to(self.device)
                 label = batch.label.to(self.device)
 
-                output = self.model(text)
+                output = self.model(batch.text)
                 loss = self.criterion(output, label)
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
                 train_loss_epoch += loss.item()
+                loop_num += 1
 
             training_loss.append(train_loss_epoch)
             training_acc_epoch = self.accuracy_score(train_iterator)
