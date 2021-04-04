@@ -167,15 +167,15 @@ class ModelUtil:
 
         if validation:
             print("\tBest validation loss achieved after epoch: {:d}\n"
-                  "\tValidation loss: {:.6f}"
-                  "\tTraining loss: {:.6f}"
-                  "\tValidation accuracy: {:.6f}"
+                  "\tValidation loss: {:.6f}\n"
+                  "\tTraining loss: {:.6f}\n"
+                  "\tValidation accuracy: {:.6f}\n"
                   "\tTraining accuracy: {:.6f}"
                   .format(min_epoch, min_loss, training_loss[min_epoch],
                           validation_accuracy[min_epoch],
                           training_accuracy[min_epoch]))
         else:
             print("\tBest training loss achieved after epoch: {:d}\n"
-                  "\tTraining loss: {:.6f}"
+                  "\tTraining loss: {:.6f}\n"
                   "\tTraining accuracy: {:.6f}"
                   .format(min_epoch, min_loss, training_accuracy[min_epoch]))
