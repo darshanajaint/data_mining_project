@@ -22,15 +22,22 @@ class DataFrameDataset(data.Dataset):
     def __getitem__(self, i):
         return self.examples[i]
 
+    def __len__(self):
+        return len(self.examples)
+
 
 class MyDataset(Dataset):
-    def __init__(self, df):
-        self.label = df["Party"]
-        self.text = df["stemmed"]
+    def __init__(self, df, fields):
+        self.label = []
+        self.text = []
+        for _, row in df.iterrows():
+            self.label.append(row['Party'])
+            self.text.append(fields[0][1].process(row['stemmed']))
         self.len = len(self.label)
 
     def __getitem__(self, i):
-        return self.text[i], self.label[i]
+        print(self.label[i])
+        return torch.Tensor(self.text[i]), torch.Tensor(self.label[i])
 
     def __len__(self):
         return self.len

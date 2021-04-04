@@ -6,9 +6,9 @@ from torch.utils.data import DataLoader
 from data_util import get_data_iterator
 from util import get_labels
 from sklearn.metrics import accuracy_score
-from data_util import MyDataset
+
+from data_util import DataFrameDataset, MyDataset
 '''
-from data_util import DataFrameDataset
 from torchtext.legacy import data
 '''
 
@@ -135,8 +135,8 @@ class ModelUtil:
             sort_within_batch=True,
         )
         '''
-        train_ds = MyDataset(train)
-        val_ds = MyDataset(val)
+        train_ds = MyDataset(train, self.fields)
+        val_ds = MyDataset(val, self.fields)
 
         train_iterator = DataLoader(train_ds, batch_size=self.batch_size)
         val_iterator = DataLoader(val_ds, batch_size=self.batch_size)
@@ -149,11 +149,11 @@ class ModelUtil:
             self.model.train()
             train_loss_epoch = 0
             loop_num = 0
-            for batch in train_iterator:
-                text = batch.text.to(self.device)
-                label = batch.label.to(self.device)
+            for text, label in train_iterator:
+                # text = batch.text.to(self.device)
+                # label = batch.label.to(self.device)
 
-                output = self.model(batch.text)
+                output = self.model(text)
                 loss = self.criterion(output, label)
                 self.optimizer.zero_grad()
                 loss.backward()
