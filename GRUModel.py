@@ -29,8 +29,10 @@ class GRUModel(nn.Module):
         if self.bidirectional:
             output = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
 
+        print(output.size())
         output = self.fc(output)
         output = self.dropout(output)
         output = torch.squeeze(output, 1)
+        print(output.size())
 
         return output
