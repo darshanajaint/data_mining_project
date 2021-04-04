@@ -37,19 +37,6 @@ def read_csv(file, train_val_split=False):
         return df
 
 
-def create_fields():
-    SEED = 0
-    torch.manual_seed(SEED)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    TEXT = data.Field(tokenize="spacy")
-    LABEL = data.LabelField(dtype=torch.float)
-
-    fields = [("text", TEXT), ("label", LABEL)]
-    return fields, TEXT, LABEL
-
-
 def get_data_iterator(dataframe, fields, batch_size, device):
     dataset = DataFrameDataset(dataframe, fields)
     return data.BucketIterator.splits(
@@ -61,6 +48,19 @@ def get_data_iterator(dataframe, fields, batch_size, device):
         shuffle=True,
         sort_within_batch=True,
     ), dataset
+
+
+def create_fields():
+    SEED = 0
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    TEXT = data.Field(tokenize="spacy")
+    LABEL = data.LabelField(dtype=torch.float)
+
+    fields = [("text", TEXT), ("label", LABEL)]
+    return fields, TEXT, LABEL
 
 
 def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
@@ -94,10 +94,15 @@ def setup_fields(file_name, max_vocab_size, build_vocab=False,
 
 
 def save_vocab(vocab, path):
-    with open(path, "wb") as output:
-        pickle.dump(vocab, output)
+    with open(path, "w+") as output:
+        for token, index in vocab.stoi.items():
+            output.write(f'{index}\t{token}\n')
 
 
 def load_vocab(path, field):
+    vocab = dict()
     with open(path, "r") as file:
+        for line in file:
+            index, token = line.split("\t")
+            vocab[token] = int(index)
         field.vocab = pickle.load(file)

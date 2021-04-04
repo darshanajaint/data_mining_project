@@ -20,6 +20,17 @@ https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
 
 
+def str2bool(arg):
+    if isinstance(arg, bool):
+        return argparse
+    if arg == "True":
+        return True
+    elif arg == "False":
+        return False
+    else:
+        raise argparse.ArgumentTypeError("boolean expected")
+
+
 def main():
     parser = argparse.ArgumentParser(description='Train neural network')
     parser.add_argument('--batch_size', type=int,
@@ -39,7 +50,7 @@ def main():
     parser.add_argument('--dropout', type=float,
                         help='decimal number of percentage of dropout to apply '
                              'in model')
-    parser.add_argument('--bidirectional', type=bool,
+    parser.add_argument('--bidirectional', type=str2bool,
                         help='True if GRU should be bidirectional, False '
                              'otherwise')
     parser.add_argument('--model_save_path', type=str,
@@ -50,7 +61,7 @@ def main():
                         help='Path to save training metrics. Default '
                              './gru_metrics.pt',
                         default='./gru_metrics.pt')
-    parser.add_argument('--build_vocab', type=bool,
+    parser.add_argument('--build_vocab', type=str2bool,
                         help='Whether to build vocab from train set or to use '
                              'prebuilt vocab. If False, ensure the '
                              'files with the text and label vocab exist and '
@@ -70,8 +81,12 @@ def main():
 
     args = parser.parse_args()
 
+    for arg in vars(args):
+        print(arg, getattr(args, arg))
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+    print("About to set up fields...")
     fields, TEXT, LABEL = setup_fields(
         args.train_csv,
         args.max_vocab_size,
@@ -80,6 +95,7 @@ def main():
         label_vocab_path=args.label_vocab_path
     )
 
+    print("Creating model...")
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
@@ -87,11 +103,14 @@ def main():
     optimizer = Adam(params=model.parameters(), lr=args.lr)
     criterion = BCEWithLogitsLoss()
 
+    print("Creating model util...")
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
+    print("Creating train and validation data frames...")
     train_df, valid_df = read_csv(args.train_csv)
 
+    print("About to train...")
     model.fit(train_df, args.epochs, valid_df)
 
 
