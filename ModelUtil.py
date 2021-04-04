@@ -144,12 +144,14 @@ class ModelUtil:
             self.model.train()
             train_loss_epoch = 0
             loop_num = 0
-            for text, label in train_iterator:
+            for batch in train_iterator:
+                for item in batch:
+                    print(item)
                 # text = batch.text.to(self.device)
                 # label = batch.label.to(self.device)
 
-                output = self.model(text)
-                loss = self.criterion(output, label)
+                output = self.model(batch.text)
+                loss = self.criterion(output, batch.label)
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()

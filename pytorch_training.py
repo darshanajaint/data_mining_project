@@ -83,10 +83,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    fields, TEXT, _ = setup_fields(
-        args.train_csv,
-        args.max_vocab_size
-    )
+    fields, TEXT, _ = setup_fields(args.train_csv,args.max_vocab_size)
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
