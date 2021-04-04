@@ -135,11 +135,6 @@ class ModelUtil:
             sort_within_batch=True,
         )
         '''
-        train_ds = MyDataset(train, self.fields)
-        val_ds = MyDataset(val, self.fields)
-
-        train_iterator = DataLoader(train_ds, batch_size=self.batch_size)
-        val_iterator = DataLoader(val_ds, batch_size=self.batch_size)
 
         min_loss = float("inf")
         min_epoch = -1

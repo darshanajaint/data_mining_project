@@ -3,7 +3,6 @@ import torch.backends.cudnn
 import pandas as pd
 
 from torchtext.legacy import data
-from torch.utils.data import Dataset
 
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
@@ -26,22 +25,6 @@ class DataFrameDataset(data.Dataset):
         return len(self.examples)
 
 
-class MyDataset(Dataset):
-    def __init__(self, df, fields):
-        self.label = []
-        self.text = []
-        for _, row in df.iterrows():
-            self.label.append(row['Party'])
-            self.text.append(fields[0][1].process(row['stemmed']))
-        self.len = len(self.label)
-
-    def __getitem__(self, i):
-        print(self.label[i])
-        return torch.Tensor(self.text[i]), torch.Tensor(self.label[i])
-
-    def __len__(self):
-        return self.len
-
 def read_csv(file, train_val_split=False):
     df = pd.read_csv(file)
 
@@ -60,8 +43,8 @@ def read_csv(file, train_val_split=False):
 def get_data_iterator(dataframe, fields, batch_size, device):
     dataset = DataFrameDataset(dataframe, fields)
     iterator = data.BucketIterator.splits(
-        (dataset, ),
-        batch_sizes=(batch_size, ),
+        (dataset,),
+        batch_sizes=(batch_size,),
         device=device,
         sort_key=lambda x: len(x.text),
         sort=False,
