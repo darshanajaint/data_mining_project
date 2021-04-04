@@ -10,6 +10,7 @@ import argparse
 from GRUModel import GRUModel
 from ModelUtil import ModelUtil
 from data_util import *
+from util import str2bool
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 import torch
@@ -20,17 +21,6 @@ Other packages to download
 https://pypi.org/project/spacy-pytorch-transformers/
 https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
-
-
-def str2bool(arg):
-    if isinstance(arg, bool):
-        return argparse
-    if arg == "True":
-        return True
-    elif arg == "False":
-        return False
-    else:
-        raise argparse.ArgumentTypeError("boolean expected")
 
 
 def main():

@@ -86,6 +86,7 @@ class ModelUtil:
         self.model.eval()
 
         loss = 0
+        num_loop = 0
         with torch.no_grad():
             for batch in data:
                 text = batch.text.to(self.device)
@@ -93,7 +94,8 @@ class ModelUtil:
 
                 output = self.model(text)
                 loss += self.criterion(output, labels).item()
-        return loss
+                num_loop += 1
+        return loss / num_loop
 
     def fit(self, data, num_epochs, validation=False, save_final=False):
 
@@ -109,6 +111,7 @@ class ModelUtil:
             self.model.train()
 
             train_loss_epoch = 0
+            num_loop = 0
             for batch in train_iterator:
                 text = batch.text.to(self.device)
                 label = batch.label.to(self.device)
@@ -120,8 +123,9 @@ class ModelUtil:
                 self.optimizer.step()
 
                 train_loss_epoch += loss.item()
+                num_loop += 1
 
-            training_loss.append(train_loss_epoch)
+            training_loss.append(train_loss_epoch / num_loop)
             training_acc_epoch = self._accuracy(train_iterator)
             training_accuracy.append(training_acc_epoch)
 
