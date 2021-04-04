@@ -17,7 +17,7 @@ def plot_data(train, val, data_type):
     plt.plot(x, train, c='b', label='Training {:s}'.format(data_type))
 
     if val is not None:
-        plt.plot(x, val, c='o', label='Validation {:s}'.format(data_type))
+        plt.plot(x, val, c='r', label='Validation {:s}'.format(data_type))
         plt.legend()
 
     plt.xlabel("Epoch")
