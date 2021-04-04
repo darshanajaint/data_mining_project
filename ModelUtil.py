@@ -4,9 +4,10 @@ from torch.nn import BCEWithLogitsLoss
 from data_util import get_data_iterator
 from util import get_labels
 from sklearn.metrics import accuracy_score
+'''
 from data_util import DataFrameDataset
 from torchtext.legacy import data
-
+'''
 
 class ModelUtil:
 
@@ -54,8 +55,11 @@ class ModelUtil:
     def accuracy_score(self, data):
         data_loader, _ = get_data_iterator(data, self.batch_size,
                                            self.fields, self.device)
-        labels = get_labels(data_loader, self.device)
-        predictions = self._predict(data_loader, predict_class=True)
+        return self._accuracy(data_loader)
+
+    def _accuracy(self, data_iterator):
+        labels = get_labels(data_iterator, self.device)
+        predictions = self._predict(data_iterator, predict_class=True)
         return accuracy_score(labels, predictions)
 
     def predict_class(self, data):
@@ -114,6 +118,7 @@ class ModelUtil:
         val_iterator, validation_loss, validation_accuracy = \
             self._set_up_train_vars(val)
 
+        '''
         train_ds = DataFrameDataset(train, self.fields)
         val_ds = DataFrameDataset(val, self.fields)
 
@@ -126,6 +131,7 @@ class ModelUtil:
             shuffle=True,
             sort_within_batch=True,
         )
+        '''
 
         min_loss = float("inf")
         min_epoch = -1
@@ -149,7 +155,7 @@ class ModelUtil:
                 loop_num += 1
 
             training_loss.append(train_loss_epoch)
-            training_acc_epoch = self.accuracy_score(train_iterator)
+            training_acc_epoch = self._accuracy(train_iterator)
             training_accuracy.append(training_acc_epoch)
 
             print("Finished epoch {:d}\n"
@@ -160,7 +166,7 @@ class ModelUtil:
             if val is not None:
                 val_loss_epoch = self._evaluate_data(val_iterator)
                 validation_loss.append(val_loss_epoch)
-                val_acc_epoch = self.accuracy_score(val_iterator)
+                val_acc_epoch = self._accuracy(val_iterator)
                 validation_accuracy.append(val_acc_epoch)
 
                 print("\tValidation accuracy: {:.6f}\n"
