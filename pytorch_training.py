@@ -72,22 +72,18 @@ def main():
                         help='Path where text vocab will be saved (if built '
                              'from data set) or loaded from. Default ' 
                              './text_vocab.pickle.',
-                        default='./text_vocab.pickle')
+                        default='./text_vocab.txt')
     parser.add_argument('--label_vocab_path', type=str,
                         help='Path where label vocab will be saved (if built '
                              'from data set) or loaded from. Default '
                              './label_vocab.pickle.',
-                        default='./label_vocab.pickle')
+                        default='./label_vocab.txt')
 
     args = parser.parse_args()
 
-    for arg in vars(args):
-        print(arg, getattr(args, arg))
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    print("About to set up fields...")
-    fields, TEXT, LABEL = setup_fields(
+    fields, TEXT, _ = setup_fields(
         args.train_csv,
         args.max_vocab_size,
         build_vocab=args.build_vocab,
@@ -95,7 +91,6 @@ def main():
         label_vocab_path=args.label_vocab_path
     )
 
-    print("Creating model...")
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
@@ -103,14 +98,11 @@ def main():
     optimizer = Adam(params=model.parameters(), lr=args.lr)
     criterion = BCEWithLogitsLoss()
 
-    print("Creating model util...")
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    print("Creating train and validation data frames...")
-    train_df, valid_df = read_csv(args.train_csv)
+    train_df, valid_df = read_csv(args.train_csv, train_val_split=True)
 
-    print("About to train...")
     model.fit(train_df, args.epochs, valid_df)
 
 

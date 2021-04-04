@@ -82,7 +82,7 @@ class ModelUtil:
         return pred
 
     def _set_up_train_vars(self, data):
-        if data:
+        if data is not None:
             iterator, _ = get_data_iterator(data, self.batch_size, self.fields,
                                             self.device)
         else:
@@ -140,7 +140,7 @@ class ModelUtil:
                   "\tTotal training loss: {:.6f}"
                   .format(epoch, training_acc_epoch, train_loss_epoch))
 
-            if val:
+            if val is not None:
                 val_loss_epoch = self._evaluate_data(val_iterator)
                 validation_loss.append(val_loss_epoch)
                 val_acc_epoch = self.accuracy_score(val_iterator)
@@ -166,7 +166,7 @@ class ModelUtil:
 
         print("Finished training!")
 
-        if val:
+        if val is not None:
             print("\tBest validation loss achieved after epoch: {:d}\n"
                   "\tValidation loss: {:.6f}"
                   "\tTraining loss: {:.6f}"

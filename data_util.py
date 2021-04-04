@@ -1,7 +1,6 @@
 import torch
 import torch.backends.cudnn
 import pandas as pd
-import pickle
 
 from torchtext.legacy import data
 
@@ -105,4 +104,4 @@ def load_vocab(path, field):
         for line in file:
             index, token = line.split("\t")
             vocab[token] = int(index)
-        field.vocab = pickle.load(file)
+        field.vocab = vocab
