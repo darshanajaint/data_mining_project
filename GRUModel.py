@@ -13,7 +13,7 @@ class GRUModel(nn.Module):
 
         self.embedding = nn.Embedding(len(text_field.vocab), input_size)
         self.rnn = nn.GRU(input_size, hidden_size, batch_first=False,
-                          bidirectional=bidirectional, dropout=dropout)
+                          bidirectional=bidirectional)
         self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(hidden_size * (2 if self.bidirectional else 1), 1)
 
@@ -28,11 +28,9 @@ class GRUModel(nn.Module):
 
         if self.bidirectional:
             output = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
-        # else:
-        #     output = hidden
 
-        output = self.dropout(output)
         output = self.fc(output)
+        output = self.dropout(output)
         output = torch.squeeze(output, 1)
 
         return output
