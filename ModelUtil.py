@@ -105,8 +105,8 @@ class ModelUtil:
             (val_iterator, validation_loss, validation_accuracy) = \
             self._set_up_train_vars(data)
 
-        min_accuracy = float("inf")
-        min_epoch = -1
+        max_accuracy = -float("inf")
+        max_epoch = -1
 
         print("Starting training...")
         for epoch in range(num_epochs):
@@ -150,9 +150,9 @@ class ModelUtil:
             else:
                 accuracy_epoch = training_acc_epoch
 
-            if accuracy_epoch < min_accuracy:
-                min_accuracy = accuracy_epoch
-                min_epoch = epoch
+            if accuracy_epoch > max_accuracy:
+                max_accuracy = accuracy_epoch
+                max_epoch = epoch
 
                 # Save best model so far
                 self.save_model(self.model_path + "_epoch_{:d}.pt".format(
@@ -174,15 +174,15 @@ class ModelUtil:
                   "\tTraining accuracy: {:.6f}\n"
                   "\tValidation loss: {:.6f}\n"
                   "\tTraining loss: {:.6f}\n"
-                  .format(min_epoch, min_accuracy, training_accuracy[min_epoch],
-                          validation_loss[min_epoch],
-                          training_loss[min_epoch]))
+                  .format(max_epoch, max_accuracy, training_accuracy[max_epoch],
+                          validation_loss[max_epoch],
+                          training_loss[max_epoch]))
         else:
             print("\tBest training accuracy achieved after epoch: {:d}\n"
                   "\tTraining accuracy: {:.6f}\n"
                   "\tTraining loss: {:.6f}\n"
-                  .format(min_epoch, min_accuracy,
-                          training_loss[min_epoch]))
+                  .format(max_epoch, max_accuracy,
+                          training_loss[max_epoch]))
 
         if save_final:
             self.save_model(self.model_path + "_final_model.pt")
