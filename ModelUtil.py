@@ -121,7 +121,7 @@ class ModelUtil:
         val_iterator, validation_loss, validation_accuracy = \
             self._set_up_train_vars(val)
 
-        '''
+
         train_ds = DataFrameDataset(train, self.fields)
         val_ds = DataFrameDataset(val, self.fields)
 
@@ -134,7 +134,6 @@ class ModelUtil:
             shuffle=True,
             sort_within_batch=True,
         )
-        '''
 
         min_loss = float("inf")
         min_epoch = -1
