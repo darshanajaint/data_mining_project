@@ -14,3 +14,6 @@
 .idea
 *.xml
 *.iml
+
+# Ignore pycache files
+__pycache__
