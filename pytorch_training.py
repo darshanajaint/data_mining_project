@@ -72,7 +72,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_iter, val_iter, fields, TEXT, LABEL = load_train_val_data(
+    train_iter, val_iter, (fields, TEXT, LABEL) = load_train_val_data(
         args.train_csv,
         args.max_vocab_size,
         args.batch_size,
