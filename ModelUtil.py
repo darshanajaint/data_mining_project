@@ -7,7 +7,7 @@ from data_util import get_data_iterator
 from util import get_labels
 from sklearn.metrics import accuracy_score
 
-from data_util import DataFrameDataset, MyDataset
+from data_util import DataFrameDataset
 '''
 from torchtext.legacy import data
 '''
