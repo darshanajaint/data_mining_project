@@ -21,9 +21,6 @@ class DataFrameDataset(data.Dataset):
     def __getitem__(self, i):
         return self.examples[i]
 
-    def __len__(self):
-        return len(self.examples)
-
 
 def read_csv(file, train_val_split=False):
     df = pd.read_csv(file)

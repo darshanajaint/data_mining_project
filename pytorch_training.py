@@ -69,7 +69,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    training_data = read_csv(args.train_csv, train_val_split=True)
+    training_data = read_csv(args.train_csv, train_val_split=args.validation)
 
     fields, TEXT, _ = setup_fields(training_data, args.max_vocab_size)
 
