@@ -23,17 +23,19 @@ class DataFrameDataset(data.Dataset):
         return self.examples[i]
 
 
-def get_data_iterator(dataframe, fields, batch_size, device):
-    dataset = DataFrameDataset(dataframe, fields)
-    return data.BucketIterator.splits(
-        dataset,
-        batch_size=batch_size,
-        device=device,
-        sort_key=lambda x: len(x.text),
-        sort=False,
-        shuffle=True,
-        sort_within_batch=True,
-    ), dataset
+def read_csv(file, train_val_split=False):
+    df = pd.read_csv(file)
+
+    df = df[["stemmed", "Party"]]
+    df.loc[df["Party"] == "Independent", "Party"] = "Democrat"
+
+    le = LabelEncoder()
+    df["Party"] = le.fit_transform(df["Party"].values)
+
+    if train_val_split:
+        return train_test_split(df, test_size=0.1)
+    else:
+        return df
 
 
 def create_fields():
@@ -47,6 +49,19 @@ def create_fields():
 
     fields = [("text", TEXT), ("label", LABEL)]
     return fields, TEXT, LABEL
+
+
+def get_data_iterator(dataframe, fields, batch_size, device):
+    dataset = DataFrameDataset(dataframe, fields)
+    return data.BucketIterator.splits(
+        dataset,
+        batch_size=batch_size,
+        device=device,
+        sort_key=lambda x: len(x.text),
+        sort=False,
+        shuffle=True,
+        sort_within_batch=True,
+    ), dataset
 
 
 def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
@@ -80,21 +95,6 @@ def load_train_val_data(file_name, max_vocab_size, batch_size, device,
               text_vocab_path, label_vocab_path)
 
     return train_iter, val_iter, [fields, TEXT, LABEL]
-
-
-def read_csv(file, train_val_split=False):
-    df = pd.read_csv(file)
-
-    df = df[["stemmed", "Party"]]
-    df.loc[df["Party"] == "Independent", "Party"] = "Democrat"
-
-    le = LabelEncoder()
-    df["Party"] = le.fit_transform(df["Party"].values)
-
-    if train_val_split:
-        return train_test_split(df, test_size=0.1)
-    else:
-        return df
 
 
 def save_vocab(vocab, path):

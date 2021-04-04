@@ -22,130 +22,6 @@ https://pypi.org/project/spacy-pytorch-transformers/
 https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
 
-
-def train(model, train_iterator, val_iterator, num_epochs, learning_rate,
-          device, model_path="", metrics_path=""):
-    criterion = BCEWithLogitsLoss()
-    optimizer = optim.Adam(params=model.parameters(),
-                           learning_rate=learning_rate)
-
-    training_loss = []
-    validation_loss = []
-
-    training_accuracy = []
-    validation_accuracy = []
-
-    train_labels = get_labels(train_iterator, device)
-
-    min_loss = float("inf")
-    min_epoch = -1
-
-    if model_path == "":
-        model_path = "./gru_models/gru_model"
-    if metrics_path == "":
-        metrics_path = "./gru_metrics/gru_metrics"
-
-    print("Starting training...")
-    for epoch in range(num_epochs):
-        model.train()
-        train_loss_epoch = 0
-
-        train_predictions = []
-        for batch in train_iterator:
-            text = batch.text.to(device)
-            label = batch.label.to(device)
-
-            output = model(text)
-            loss = criterion(output, label)
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            train_loss_epoch += loss.item()
-            train_predictions += list(output.detach().cpu().numpy())
-
-        train_predictions = np.asarray(train_predictions, dtype=object)
-        print("Train pred shape:", train_predictions.shape)
-        print("Train labels shape:", train_labels.shape)
-        train_acc_epoch = accuracy_score(train_labels, train_predictions)
-
-        training_loss.append(train_loss_epoch)
-        training_accuracy.append(train_acc_epoch)
-
-        val_loss_epoch, val_acc_epoch = evaluate(val_iterator, model,
-                                                 criterion, device)
-        validation_loss.append(val_loss_epoch)
-        validation_accuracy.append(val_acc_epoch)
-
-        # Keep track of epoch with minimum validation loss
-        if val_loss_epoch < min_loss:
-            min_loss = val_loss_epoch
-            min_epoch = epoch
-
-            # Save best model so far
-            save_model(model_path + "_epoch_{:d}.pt".format(epoch), model,
-                       optimizer)
-            save_metrics(metrics_path + "_epoch_{:d}.pt".format(epoch), epoch,
-                         train_acc_epoch, val_acc_epoch, train_loss_epoch,
-                         val_loss_epoch)
-
-        # Compute training and validation accuracies.
-
-        print("Finished epoch {:d}\n"
-              "\tTraining accuracy: {:.6f}"
-              "\tValidation accuracy: {:.6f}"
-              "\tTotal training loss: {:.6f}\n"
-              "\tTotal validation loss: {:.6f}"
-              .format(epoch, train_acc_epoch, val_acc_epoch, train_loss_epoch,
-                      val_loss_epoch))
-
-    print("Finished training!\n"
-          "\tBest validation loss achieved after epoch: {:d}\n"
-          "\tMin validation loss: {:.6f}".format(min_epoch, min_loss))
-
-
-def evaluate(data_loader, model, criterion, device):
-    model.eval()
-
-    true_labels = get_labels(data_loader, device)
-
-    predictions = []
-    loss = 0
-    with torch.no_grad():
-        for batch in data_loader:
-            text = batch.text.to(device)
-            labels = batch.label.to(device)
-
-            output = model(text)
-            loss += criterion(output, labels).item()
-
-            predictions += list(output.cpu().numpy())
-
-    predictions = np.asarray(predictions, dtype=object)
-    accuracy = accuracy_score(true_labels, predictions)
-
-    return loss, accuracy
-
-
-def get_labels(iterator, device):
-    labels = []
-    for batch in iterator:
-        label = batch.label.to(device)
-        labels += list(label.cpu().numpy())
-    return np.asarray(labels)
-
-
-def str2bool(arg):
-    if isinstance(arg, bool):
-        return argparse
-    if arg == "True":
-        return True
-    elif arg == "False":
-        return False
-    else:
-        raise argparse.ArgumentTypeError("boolean expected")
-
-
 def main():
     parser = argparse.ArgumentParser(description='Train neural network')
     parser.add_argument('--batch_size', type=int,
@@ -165,7 +41,7 @@ def main():
     parser.add_argument('--dropout', type=float,
                         help='decimal number of percentage of dropout to apply '
                              'in model')
-    parser.add_argument('--bidirectional', type=str2bool,
+    parser.add_argument('--bidirectional', type=bool,
                         help='True if GRU should be bidirectional, False '
                              'otherwise')
     parser.add_argument('--build_vocab', type=bool,
