@@ -145,8 +145,12 @@ class ModelUtil:
             train_loss_epoch = 0
             loop_num = 0
             for batch in train_iterator:
+                iter = 0
                 for item in batch:
                     print(item)
+                    iter += 1
+
+                print(iter)
                 # text = batch.text.to(self.device)
                 # label = batch.label.to(self.device)
 
