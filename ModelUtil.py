@@ -125,7 +125,8 @@ class ModelUtil:
                 train_loss_epoch += loss.item()
                 num_loop += 1
 
-            training_loss.append(train_loss_epoch / num_loop)
+            train_loss_epoch /= num_loop
+            training_loss.append(train_loss_epoch)
             training_acc_epoch = self._accuracy(train_iterator)
             training_accuracy.append(training_acc_epoch)
 
