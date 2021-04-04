@@ -1,9 +1,12 @@
 import torch
 import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss
+from torch.utils.data import DataLoader
+
 from data_util import get_data_iterator
 from util import get_labels
 from sklearn.metrics import accuracy_score
+from data_util import MyDataset
 '''
 from data_util import DataFrameDataset
 from torchtext.legacy import data
@@ -132,6 +135,11 @@ class ModelUtil:
             sort_within_batch=True,
         )
         '''
+        train_ds = MyDataset(train)
+        val_ds = MyDataset(val)
+
+        train_iterator = DataLoader(train_ds, batch_size=self.batch_size)
+        val_iterator = DataLoader(val_ds, batch_size=self.batch_size)
 
         min_loss = float("inf")
         min_epoch = -1
