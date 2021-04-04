@@ -61,31 +61,17 @@ def main():
                         help='Path to save training metrics. Default '
                              './gru_metrics.pt',
                         default='./gru_metrics.pt')
-    parser.add_argument('--build_vocab', type=str2bool,
-                        help='Whether to build vocab from train set or to use '
-                             'prebuilt vocab. If False, ensure the '
-                             'files with the text and label vocab exist and '
-                             'are specified under their respective tags. '
-                             'Default True.',
-                        default=True)
-    parser.add_argument('--text_vocab_path', type=str,
-                        help='Path where text vocab will be saved (if built '
-                             'from data set) or loaded from. Default ' 
-                             './text_vocab.txt.',
-                        default='./text_vocab.txt')
-    parser.add_argument('--label_vocab_path', type=str,
-                        help='Path where label vocab will be saved (if built '
-                             'from data set) or loaded from. Default '
-                             './label_vocab.txt.',
-                        default='./label_vocab.txt')
+    parser.add_argument('--validation', type=str2bool,
+                        help='Whether to train with validation data or not. '
+                             'Default True.', default=True)
 
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_df, valid_df = read_csv(args.train_csv, train_val_split=True)
+    training_data = read_csv(args.train_csv, train_val_split=True)
 
-    fields, TEXT, _ = setup_fields(train_df, args.max_vocab_size)
+    fields, TEXT, _ = setup_fields(training_data, args.max_vocab_size)
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
@@ -93,11 +79,12 @@ def main():
     model.to(device)
     optimizer = Adam(params=model.parameters(), lr=args.lr)
     criterion = BCEWithLogitsLoss()
+    criterion.to(device)
 
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    model.fit(train_df, args.epochs, valid_df)
+    model.fit(data, args.epochs, args.validation)
 
 
 if __name__ == "__main__":

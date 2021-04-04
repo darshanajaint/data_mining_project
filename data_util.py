@@ -34,10 +34,11 @@ def read_csv(file, train_val_split=False):
     le = LabelEncoder()
     df["Party"] = le.fit_transform(df["Party"].values)
 
+    train, val = train_test_split(df, test_size=0.1)
     if train_val_split:
-        return train_test_split(df, test_size=0.1)
+        return train, val
     else:
-        return df
+        return df, val
 
 
 def get_data_iterator(train, val, fields, batch_size, device):
@@ -78,7 +79,7 @@ def setup_fields(dataframe, max_vocab_size):
 
     fields, TEXT, LABEL = create_fields()
 
-    train_ds = DataFrameDataset(dataframe, fields)
+    train_ds = DataFrameDataset(dataframe[0], fields)
     set_vocab(TEXT, LABEL, train_ds, max_vocab_size)
 
     return fields, TEXT, LABEL

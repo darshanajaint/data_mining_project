@@ -20,7 +20,6 @@ class GRUModel(nn.Module):
         #   Note that it was originally used as the output shape for the FC
 
     def forward(self, text):
-        print(text)
         text_embedded = self.embedding(text)
         # text_embedded shape: [sentence length, batch size, embedding dim]
 

@@ -52,9 +52,9 @@ class ModelUtil:
         torch.save(state, self.metrics_path)
 
     def accuracy_score(self, data):
-        data_loader = get_data_iterator(data, self.batch_size,
+        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
                                         self.fields, self.device)
-        return self._accuracy(data_loader)
+        return self._accuracy(data_loader[0])
 
     def _accuracy(self, data_iterator):
         labels = get_labels(data_iterator, self.device)
@@ -62,14 +62,14 @@ class ModelUtil:
         return accuracy_score(labels, predictions)
 
     def predict_class(self, data):
-        data_loader = get_data_iterator(data, self.batch_size,
+        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
                                         self.fields, self.device)
-        return self._predict(data_loader, True)
+        return self._predict(data_loader[0], True)
 
     def predict_prob(self, data):
-        data_loader = get_data_iterator(data, self.batch_size,
+        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
                                         self.fields, self.device)
-        return self._predict(data_loader, False)
+        return self._predict(data_loader[0], False)
 
     def _predict(self, iterator, predict_class):
         self.model.eval()
@@ -86,9 +86,9 @@ class ModelUtil:
                 pred += list(output.cpu().numpy())
         return pred
 
-    def _set_up_train_vars(self, train, val):
+    def _set_up_train_vars(self, data):
         train_iterator, val_iterator = get_data_iterator(
-            train, val, self.fields, self.batch_size, self.device)
+            data[0], data[1], self.fields, self.batch_size, self.device)
         return (train_iterator, [], []), (val_iterator, [], [])
 
     def _evaluate_data(self, data):
@@ -104,11 +104,11 @@ class ModelUtil:
                 loss += self.criterion(output, labels).item()
         return loss
 
-    def fit(self, train, num_epochs, val=None):
+    def fit(self, data, num_epochs, validation=False):
 
         (train_iterator, training_loss, training_accuracy), \
             (val_iterator, validation_loss, validation_accuracy) = \
-            self._set_up_train_vars(train, val)
+            self._set_up_train_vars(data)
 
         min_loss = float("inf")
         min_epoch = -1
@@ -116,20 +116,19 @@ class ModelUtil:
         print("Starting training...")
         for epoch in range(num_epochs):
             self.model.train()
+
             train_loss_epoch = 0
-            loop_num = 0
             for batch in train_iterator:
                 text = batch.text.to(self.device)
                 label = batch.label.to(self.device)
 
-                output = self.model(batch.text)
-                loss = self.criterion(output, batch.label)
+                output = self.model(text)
+                loss = self.criterion(output, label)
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
 
                 train_loss_epoch += loss.item()
-                loop_num += 1
 
             training_loss.append(train_loss_epoch)
             training_acc_epoch = self._accuracy(train_iterator)
@@ -140,7 +139,7 @@ class ModelUtil:
                   "\tTotal training loss: {:.6f}"
                   .format(epoch, training_acc_epoch, train_loss_epoch))
 
-            if val is not None:
+            if validation:
                 val_loss_epoch = self._evaluate_data(val_iterator)
                 validation_loss.append(val_loss_epoch)
                 val_acc_epoch = self._accuracy(val_iterator)
@@ -161,12 +160,12 @@ class ModelUtil:
                 self.save_model(self.model_path + "_epoch_{:d}.pt".format(
                     epoch))
 
-        self.save_metrics(training_accuracy, training_loss, val,
+        self.save_metrics(training_accuracy, training_loss, validation,
                           validation_accuracy, validation_loss)
 
         print("Finished training!")
 
-        if val is not None:
+        if validation:
             print("\tBest validation loss achieved after epoch: {:d}\n"
                   "\tValidation loss: {:.6f}"
                   "\tTraining loss: {:.6f}"
