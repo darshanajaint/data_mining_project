@@ -72,11 +72,9 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    train_iter, val_iter, (fields, TEXT, LABEL) = load_train_val_data(
+    fields, TEXT, LABEL = setup_fields(
         args.train_csv,
         args.max_vocab_size,
-        args.batch_size,
-        device,
         build_vocab=args.build_vocab,
         text_vocab_path=args.text_vocab_path,
         label_vocab_path=args.label_vocab_path
@@ -92,7 +90,9 @@ def main():
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    model.fit(train_iter, args.epochs, val_iter)
+    train_df, valid_df = read_csv(args.train_csv)
+
+    model.fit(train_df, args.epochs, valid_df)
 
 
 if __name__ == "__main__":

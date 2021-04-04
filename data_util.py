@@ -79,22 +79,18 @@ def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
         load_vocab(label_vocab_path, label)
 
 
-def load_train_val_data(file_name, max_vocab_size, batch_size, device,
-                        build_vocab=False,
-                        text_vocab_path="./text_vocab.pickle",
-                        label_vocab_path="./label_vocab.pickle"):
-    train_df, valid_df = read_csv(file_name, True)
+def setup_fields(file_name, max_vocab_size, build_vocab=False,
+                 text_vocab_path="./text_vocab.pickle",
+                 label_vocab_path="./label_vocab.pickle"):
+    train_df, _ = read_csv(file_name, True)
 
     fields, TEXT, LABEL = create_fields()
 
-    train_iter, train_ds = get_data_iterator(train_df, fields, batch_size,
-                                             device)
-    val_iter, _ = get_data_iterator(valid_df, fields, batch_size, device)
-
+    train_ds = DataFrameDataset(train_df, fields)
     set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
               text_vocab_path, label_vocab_path)
 
-    return train_iter, val_iter, [fields, TEXT, LABEL]
+    return fields, TEXT, LABEL
 
 
 def save_vocab(vocab, path):
