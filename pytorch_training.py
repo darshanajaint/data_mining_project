@@ -85,10 +85,7 @@ def main():
 
     fields, TEXT, _ = setup_fields(
         args.train_csv,
-        args.max_vocab_size,
-        build_vocab=args.build_vocab,
-        text_vocab_path=args.text_vocab_path,
-        label_vocab_path=args.label_vocab_path
+        args.max_vocab_size
     )
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
