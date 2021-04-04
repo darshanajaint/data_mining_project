@@ -52,8 +52,8 @@ class ModelUtil:
         torch.save(state, self.metrics_path)
 
     def accuracy_score(self, data):
-        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
-                                        self.fields, self.device)
+        data_loader = get_data_iterator(data[0], data[1], self.fields,
+                                        self.batch_size, self.device)
         return self._accuracy(data_loader[0])
 
     def _accuracy(self, data_iterator):
@@ -62,13 +62,13 @@ class ModelUtil:
         return accuracy_score(labels, predictions)
 
     def predict_class(self, data):
-        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
-                                        self.fields, self.device)
+        data_loader = get_data_iterator(data[0], data[1], self.fields,
+                                        self.batch_size, self.device)
         return self._predict(data_loader[0], True)
 
     def predict_prob(self, data):
-        data_loader = get_data_iterator(data[0], data[1], self.batch_size,
-                                        self.fields, self.device)
+        data_loader = get_data_iterator(data[0], data[1], self.fields,
+                                        self.batch_size, self.device)
         return self._predict(data_loader[0], False)
 
     def _predict(self, iterator, predict_class):
