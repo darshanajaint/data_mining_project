@@ -62,7 +62,7 @@ def main():
                              'training. Default False.', default=False)
     parser.add_argument('--test_after_train', type=str2bool,
                         help='Whether to run the test set immediately after '
-                             'training.', default=False)
+                             'training.', default=True)
     parser.add_argument('--test', type=str2bool,
                         help='Whether to open the model in test mode or train '
                              'mode. Default False.', default=False)
