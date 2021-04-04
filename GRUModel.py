@@ -13,7 +13,7 @@ class GRUModel(nn.Module):
 
         self.embedding = nn.Embedding(len(text_field.vocab), input_size)
         self.rnn = nn.GRU(input_size, hidden_size, batch_first=False,
-                          bidirectional=bidirectional)
+                          bidirectional=bidirectional, dropout=dropout)
         self.dropout = nn.Dropout(dropout)
         self.fc = nn.Linear(hidden_size * (2 if self.bidirectional else 1), 1)
 
