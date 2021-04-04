@@ -1,0 +1,28 @@
+TODO:
+- save and load vocab after building
+	- written 
+	- will not work - things like torch.save and pickle dumps don't
+		properly save the vocab class
+	- can save the dictionary but internally referring to other 
+		class variables we don't have access to 
+	- more trouble than it's worth
+	- https://github.com/bentrevett/pytorch-sentiment-analysis/issues/40
+- accuracy counters
+	- written, works
+- testing loop
+	- written, 
+- get probabilities and predictions from model
+	- written, works
+- add model and metrics save name to argparse
+	- written, works
+- threshold the sigmoid for classes
+	- written, works
+- check vocab size after it's been built
+	- done, < 25,000 (~24900)
+
+- script to run grid search based on given parameters
+	- done
+- interface with colab drive
+	- done
+
+- text carter that writing is done by 7 pm tomorrow

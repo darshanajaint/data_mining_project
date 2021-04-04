@@ -14,10 +14,8 @@ class GRUModel(nn.Module):
         self.embedding = nn.Embedding(len(text_field.vocab), input_size)
         self.rnn = nn.GRU(input_size, hidden_size, batch_first=False,
                           bidirectional=bidirectional)
-        self.fc = nn.Linear(hidden_size * (2 if self.bidirectional else 1), 1)
         self.dropout = nn.Dropout(dropout)
-        # Question: Why did we have the num_classes input for the GRU?
-        #   Note that it was originally used as the output shape for the FC
+        self.fc = nn.Linear(hidden_size * (2 if self.bidirectional else 1), 1)
 
     def forward(self, text):
         text_embedded = self.embedding(text)
@@ -30,11 +28,11 @@ class GRUModel(nn.Module):
 
         if self.bidirectional:
             output = torch.cat((hidden[-2, :, :], hidden[-1, :, :]), dim=1)
-        else:
-            output = hidden
+        # else:
+        #     output = hidden
 
-        output = self.fc(output)
         output = self.dropout(output)
+        output = self.fc(output)
         output = torch.squeeze(output, 1)
 
         return output

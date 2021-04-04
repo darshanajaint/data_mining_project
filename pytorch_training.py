@@ -37,7 +37,7 @@ def main():
     parser = argparse.ArgumentParser(description='Train neural network')
     parser.add_argument('--batch_size', type=int,
                         help='batch size to be used in training and evaluation', 
-                        default = 128)
+                        default=128)
     parser.add_argument('--train_csv', type=str,
                         help='csv filename and path for the train dataset')
     parser.add_argument('--lr', type=float,
@@ -70,10 +70,25 @@ def main():
     parser.add_argument('--save_final_model', type=str2bool,
                         help='Whether to save the final model during '
                              'training. Default False.', default=False)
+    parser.add_argument('--test', type=str2bool,
+                        help='Whether to open the model in test mode or train '
+                             'mode. Default False.', default=False)
     parser.add_argument('--test_csv', type=str,
-                        help='Path to test data. Default empty.', default='')
+                        help='Path to test data. Default empty. Must be set '
+                             'if test is True.', default='')
+    parser.add_argument('--model_load_path', type=str,
+                        help='Path from which to load a pretrained model. '
+                             'Must beset if test is True.', default='')
+    parser.add_argument('--test_metrics_save_path', type=str,
+                        help='Path where the test metrics will be saved. Must '
+                             'be set if test is True.', default='')
 
     args = parser.parse_args()
+
+    if args.test and (args.test_csv == '' or args.model_load_path == '' or
+                      args.test_metrics_save_path == ''):
+        raise ValueError('Cannot have empty test_csv or model_load_path '
+                         'or test_metrics_save_path when testing.')
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -97,8 +112,11 @@ def main():
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
                       criterion, args.model_save_path, args.metrics_save_path)
 
-    model.fit(training_data, args.epochs, args.validation,
-              args.save_final_model)
+    if not args.test:
+        model.fit(training_data, args.epochs, args.validation,
+                  args.save_final_model)
+    else:
+        model.load_model(args.model_load_path)
 
     if args.test_csv != '':
         test_data = read_csv(args.test_csv)
@@ -106,9 +124,12 @@ def main():
         class_probabilities = model.predict_prob(test_data)
         test_accuracy = model.accuracy_score(test_data)
 
-        print("Class predictions:\n", class_predictions[:10])
-        print("Class probabilities:\n", class_probabilities[:10])
-        print("Test accuracy:", test_accuracy)
+        state = {
+            'predictions':  class_predictions,
+            'probabilities': class_probabilities,
+            'accuracy': test_accuracy
+        }
+        model.save_metrics(state, args.test_metrics_save_path)
 
 
 if __name__ == "__main__":

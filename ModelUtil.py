@@ -38,18 +38,9 @@ class ModelUtil:
         }
         torch.save(state, path)
 
-    def save_metrics(self, training_accuracy, training_loss, val=None,
-                     validation_accuracy=None, validation_loss=None):
-        state = {
-            'training_accuracy': training_accuracy,
-            'training_loss': training_loss
-        }
-
-        if val:
-            state['validation_accuracy'] = validation_accuracy
-            state['validation_loss'] = validation_loss
-
-        torch.save(state, self.metrics_path)
+    def save_metrics(self, state, path=None):
+        path = path if path else self.metrics_path
+        torch.save(state, path)
 
     def accuracy_score(self, data):
         data_loader = get_data_iterator(data[0], data[1], self.fields,
@@ -110,7 +101,7 @@ class ModelUtil:
             (val_iterator, validation_loss, validation_accuracy) = \
             self._set_up_train_vars(data)
 
-        min_loss = float("inf")
+        min_accuracy = float("inf")
         min_epoch = -1
 
         print("Starting training...")
@@ -148,37 +139,43 @@ class ModelUtil:
                 print("\tValidation accuracy: {:.6f}\n"
                       "\tTotal validation loss: {:.6f}"
                       .format(val_acc_epoch, val_loss_epoch))
-                loss_epoch = val_loss_epoch
+                accuracy_epoch = val_acc_epoch
             else:
-                loss_epoch = train_loss_epoch
+                accuracy_epoch = training_acc_epoch
 
-            if loss_epoch < min_loss:
-                min_loss = loss_epoch
+            if accuracy_epoch < min_accuracy:
+                min_accuracy = accuracy_epoch
                 min_epoch = epoch
 
                 # Save best model so far
                 self.save_model(self.model_path + "_epoch_{:d}.pt".format(
                     epoch))
 
-        self.save_metrics(training_accuracy, training_loss, validation,
-                          validation_accuracy, validation_loss)
+        state = {
+            'training_accuracy': training_accuracy,
+            'training_loss': training_loss,
+            'validation_accuracy': validation_accuracy,
+            'validation_loss': validation_loss
+        }
+        self.save_metrics(state)
 
         print("Finished training!")
 
         if validation:
-            print("\tBest validation loss achieved after epoch: {:d}\n"
+            print("\tBest validation accuracy achieved after epoch: {:d}\n"
+                  "\tValidation accuracy: {:.6f}\n"
+                  "\tTraining accuracy: {:.6f}\n"
                   "\tValidation loss: {:.6f}\n"
                   "\tTraining loss: {:.6f}\n"
-                  "\tValidation accuracy: {:.6f}\n"
-                  "\tTraining accuracy: {:.6f}"
-                  .format(min_epoch, min_loss, training_loss[min_epoch],
-                          validation_accuracy[min_epoch],
-                          training_accuracy[min_epoch]))
+                  .format(min_epoch, min_accuracy, training_accuracy[min_epoch],
+                          validation_loss[min_epoch],
+                          training_loss[min_epoch]))
         else:
-            print("\tBest training loss achieved after epoch: {:d}\n"
+            print("\tBest training accuracy achieved after epoch: {:d}\n"
+                  "\tTraining accuracy: {:.6f}\n"
                   "\tTraining loss: {:.6f}\n"
-                  "\tTraining accuracy: {:.6f}"
-                  .format(min_epoch, min_loss, training_accuracy[min_epoch]))
+                  .format(min_epoch, min_accuracy,
+                          training_loss[min_epoch]))
 
         if save_final:
             self.save_model(self.model_path + "_final_model.pt")
