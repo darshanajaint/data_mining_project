@@ -67,6 +67,8 @@ def main():
     parser.add_argument('--save_final_model', type=str2bool,
                         help='Whether to save the final model during '
                              'training. Default False.', default=False)
+    parser.add_argument('--test_csv', type=str,
+                        help='Path to test data. Default empty.', default='')
 
     args = parser.parse_args()
 
@@ -89,6 +91,16 @@ def main():
 
     model.fit(training_data, args.epochs, args.validation,
               args.save_final_model)
+
+    if args.test_csv != '':
+        test_data = read_csv(args.test_csv)
+        class_predictions = model.predict_class(test_data)
+        class_probabilities = model.predict_prob(test_data)
+        test_accuracy = model.accuracy_score(test_data)
+
+        print("Class predictions:\n", class_predictions[:10])
+        print("Class probabilities:\n", class_probabilities[:10])
+        print("Test accuracy:", test_accuracy)
 
 
 if __name__ == "__main__":
