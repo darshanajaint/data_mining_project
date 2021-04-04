@@ -1,7 +1,6 @@
 import torch
 import torch.backends.cudnn
 import pandas as pd
-import torchtext.data as data
 import pickle
 
 from torchtext.legacy import data
@@ -13,6 +12,7 @@ from sklearn.model_selection import train_test_split
 class DataFrameDataset(data.Dataset):
     def __init__(self, df, fields):
         self.examples = []
+        print(df)
         for i, row in df.iterrows():
             label = row["Party"]
             text = row["stemmed"]
@@ -81,9 +81,10 @@ def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
 
 
 def load_train_val_data(file_name, max_vocab_size, batch_size, device,
-                        build_vocab=True, text_vocab_path="./text_vocab.pickle",
+                        build_vocab=False,
+                        text_vocab_path="./text_vocab.pickle",
                         label_vocab_path="./label_vocab.pickle"):
-    train_df, valid_df = read_csv(file_name)
+    train_df, valid_df = read_csv(file_name, True)
 
     fields, TEXT, LABEL = create_fields()
 

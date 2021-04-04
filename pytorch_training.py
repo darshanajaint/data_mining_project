@@ -19,6 +19,7 @@ https://pypi.org/project/spacy-pytorch-transformers/
 https://clay-atlas.com/us/blog/2020/05/12/python-en-package-spacy-error/
 """
 
+
 def main():
     parser = argparse.ArgumentParser(description='Train neural network')
     parser.add_argument('--batch_size', type=int,
@@ -67,7 +68,6 @@ def main():
                              './label_vocab.pickle.',
                         default='./label_vocab.pickle')
 
-
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -81,6 +81,7 @@ def main():
         text_vocab_path=args.text_vocab_path,
         label_vocab_path=args.label_vocab_path
     )
+    return
 
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
