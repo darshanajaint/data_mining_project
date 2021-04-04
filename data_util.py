@@ -16,8 +16,6 @@ class DataFrameDataset(data.Dataset):
             text = row["stemmed"]
 
             self.examples.append(data.Example.fromlist([text, label], fields))
-            print(self.examples)
-            break
         super().__init__(self.examples, fields)
 
     def __getitem__(self, i):
@@ -86,18 +84,10 @@ def setup_fields(file_name, max_vocab_size, build_vocab, text_vocab_path,
 
     fields, TEXT, LABEL = create_fields()
 
-    if build_vocab:
-        train_ds = DataFrameDataset(train_df, fields)
-        set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
-                  text_vocab_path, label_vocab_path)
-        del train_ds
-    else:
-        print("Through here")
-        set_vocab(TEXT, LABEL, build_vocab=build_vocab,
-                  text_vocab_path=text_vocab_path,
-                  label_vocab_path=label_vocab_path)
+    train_ds = DataFrameDataset(train_df, fields)
+    set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
+              text_vocab_path, label_vocab_path)
 
-    del train_df
     return fields, TEXT, LABEL
 
 
