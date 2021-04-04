@@ -6,15 +6,12 @@ Created on Sat Mar 27 11:48:56 2021
 @author: ithier
 """
 
-from torch.nn import BCEWithLogitsLoss
-import torch.optim as optim
 import argparse
-import numpy as np
-
 from GRUModel import GRUModel
+from ModelUtil import ModelUtil
 from data_util import *
-from util import save_model, save_metrics
-from sklearn.metrics import accuracy_score
+from torch.optim import Adam
+from torch.nn import BCEWithLogitsLoss
 
 """
 Other packages to download
@@ -79,10 +76,14 @@ def main():
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
-
     model.to(device)
+    optimizer = Adam(params=model.parameters(), lr=args.lr)
+    criterion = BCEWithLogitsLoss()
 
-    train(model, train_iter, val_iter, args.epochs, device)
+    model = ModelUtil(model, args.batch_size, fields, device, optimizer,
+                      criterion, args.model_base_path, args.metrics_path)
+
+    model.fit(train_iter, args.epochs, val_iter)
 
 
 if __name__ == "__main__":
