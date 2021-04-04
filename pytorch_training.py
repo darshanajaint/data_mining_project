@@ -71,12 +71,12 @@ def main():
     parser.add_argument('--text_vocab_path', type=str,
                         help='Path where text vocab will be saved (if built '
                              'from data set) or loaded from. Default ' 
-                             './text_vocab.pickle.',
+                             './text_vocab.txt.',
                         default='./text_vocab.txt')
     parser.add_argument('--label_vocab_path', type=str,
                         help='Path where label vocab will be saved (if built '
                              'from data set) or loaded from. Default '
-                             './label_vocab.pickle.',
+                             './label_vocab.txt.',
                         default='./label_vocab.txt')
 
     args = parser.parse_args()

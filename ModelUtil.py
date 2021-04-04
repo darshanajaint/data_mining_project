@@ -83,7 +83,7 @@ class ModelUtil:
 
     def _set_up_train_vars(self, data):
         if data is not None:
-            iterator, _ = get_data_iterator(data, self.batch_size, self.fields,
+            iterator, _ = get_data_iterator(data, self.fields, self.batch_size,
                                             self.device)
         else:
             iterator = None

@@ -14,7 +14,10 @@ class DataFrameDataset(data.Dataset):
         for i, row in df.iterrows():
             label = row["Party"]
             text = row["stemmed"]
+
             self.examples.append(data.Example.fromlist([text, label], fields))
+            print(self.examples)
+            break
         super().__init__(self.examples, fields)
 
     def __getitem__(self, i):
@@ -63,12 +66,11 @@ def create_fields():
 
 
 def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
-              text_vocab_path='./text_vocab.pickle',
-              label_vocab_path='./label_vocab.pickle'):
+              text_vocab_path='./text_vocab.txt',
+              label_vocab_path='./label_vocab.txt'):
     if build_vocab:
         text.build_vocab(dataset, max_size=max_vocab_size,
-                         vectors="glove.6B.200d",
-                         unk_init=torch.Tensor.zero_)
+                         vectors="glove.6B.200d", unk_init=torch.Tensor.zero_)
         label.build_vocab(dataset)
 
         save_vocab(text.vocab, text_vocab_path)
@@ -78,29 +80,36 @@ def set_vocab(text, label, build_vocab=False, dataset=None, max_vocab_size=0,
         load_vocab(label_vocab_path, label)
 
 
-def setup_fields(file_name, max_vocab_size, build_vocab=False,
-                 text_vocab_path="./text_vocab.pickle",
-                 label_vocab_path="./label_vocab.pickle"):
+def setup_fields(file_name, max_vocab_size, build_vocab, text_vocab_path,
+                 label_vocab_path):
     train_df, _ = read_csv(file_name, True)
 
     fields, TEXT, LABEL = create_fields()
 
-    train_ds = DataFrameDataset(train_df, fields)
-    set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
-              text_vocab_path, label_vocab_path)
+    if build_vocab:
+        train_ds = DataFrameDataset(train_df, fields)
+        set_vocab(TEXT, LABEL, build_vocab, train_ds, max_vocab_size,
+                  text_vocab_path, label_vocab_path)
+        del train_ds
+    else:
+        print("Through here")
+        set_vocab(TEXT, LABEL, build_vocab=build_vocab,
+                  text_vocab_path=text_vocab_path,
+                  label_vocab_path=label_vocab_path)
 
+    del train_df
     return fields, TEXT, LABEL
 
 
 def save_vocab(vocab, path):
-    with open(path, "w+") as output:
+    with open(path, "w+", encoding="utf-8") as output:
         for token, index in vocab.stoi.items():
             output.write(f'{index}\t{token}\n')
 
 
 def load_vocab(path, field):
     vocab = dict()
-    with open(path, "r") as file:
+    with open(path, "r", encoding="utf-8") as file:
         for line in file:
             index, token = line.split("\t")
             vocab[token] = int(index)
