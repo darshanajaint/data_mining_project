@@ -23,6 +23,7 @@ def plot_data(train, val, data_type):
     plt.xlabel("Epoch")
     plt.ylabel("{:s} per batch".format(data_type))
     plt.title("Plot of training {:s}".format(data_type))
+    plt.savefig("training_{:s}.png".format(data_type))
 
 
 def plot_training_data(state, val):
@@ -36,7 +37,7 @@ def plot_training_data(state, val):
 
 
 def display_test_results(state, num_res):
-    print(f"Test accuracy: {state['accuracy']:.6d}")
+    print(f"Test accuracy: {state['accuracy']:.6f}")
 
     class_pred = state['predictions']
     class_prob = state['probabilities']
