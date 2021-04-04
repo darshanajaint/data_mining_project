@@ -12,6 +12,8 @@ from ModelUtil import ModelUtil
 from data_util import *
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
+import torch
+import torch.backends.cudnn
 
 """
 Other packages to download
@@ -34,7 +36,8 @@ def str2bool(arg):
 def main():
     parser = argparse.ArgumentParser(description='Train neural network')
     parser.add_argument('--batch_size', type=int,
-                        help='batch size to be used in training and evaluation')
+                        help='batch size to be used in training and evaluation', 
+                        default = 128)
     parser.add_argument('--train_csv', type=str,
                         help='csv filename and path for the train dataset')
     parser.add_argument('--lr', type=float,
@@ -73,6 +76,11 @@ def main():
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    SEED = 0
+    torch.manual_seed(SEED)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     training_data = read_csv(args.train_csv, train_val_split=args.validation)
 

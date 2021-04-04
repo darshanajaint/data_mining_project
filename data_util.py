@@ -54,11 +54,6 @@ def get_data_iterator(train, val, fields, batch_size, device):
 
 
 def create_fields():
-    SEED = 0
-    torch.manual_seed(SEED)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
     TEXT = data.Field(tokenize="spacy")
     LABEL = data.LabelField(dtype=torch.float)
 
