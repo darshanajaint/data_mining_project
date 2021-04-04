@@ -118,6 +118,7 @@ def main():
         model.load_model(args.model_load_path)
 
     if args.test_after_train or args.test:
+        print(args.test_metrics_save_path)
         test_data = read_csv(args.test_csv)
         class_predictions = model.predict_class(test_data)
         class_probabilities = model.predict_prob(test_data)

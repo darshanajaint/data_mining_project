@@ -39,8 +39,10 @@ class ModelUtil:
         torch.save(state, path)
 
     def save_metrics(self, state, path=None):
-        path = path if path else self.metrics_path
-        torch.save(state, path)
+        if path is not None:
+            torch.save(state, path)
+        else:
+            torch.save(state, self.metrics_path)
 
     def accuracy_score(self, data):
         data_loader = get_data_iterator(data[0], data[1], self.fields,
@@ -162,7 +164,7 @@ class ModelUtil:
             'validation_accuracy': validation_accuracy,
             'validation_loss': validation_loss
         }
-        self.save_metrics(state)
+        self.save_metrics(state, None)
 
         print("Finished training!")
 
