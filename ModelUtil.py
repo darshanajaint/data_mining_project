@@ -22,7 +22,7 @@ class ModelUtil:
         self.model_path = model_path
         self.metrics_path = metrics_path
 
-        self.threshold = torch.Tensor(0.5)
+        self.threshold = torch.Tensor([0.5])
 
     def load_model(self, path):
         state = torch.load(path)
