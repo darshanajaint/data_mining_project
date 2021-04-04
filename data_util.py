@@ -43,8 +43,8 @@ def read_csv(file, train_val_split=False):
 def get_data_iterator(dataframe, fields, batch_size, device):
     dataset = DataFrameDataset(dataframe, fields)
     iterator = data.BucketIterator.splits(
-        (dataset,),
-        batch_sizes=(batch_size,),
+        dataset,
+        batch_size=batch_size,
         device=device,
         sort_key=lambda x: len(x.text),
         sort=False,
