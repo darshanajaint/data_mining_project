@@ -41,6 +41,14 @@ def main():
     parser.add_argument('--bidirectional', type=bool,
                         help='True if GRU should be bidirectional, False '
                              'otherwise')
+    parser.add_argument('--model_save_path', type=str,
+                        help='Path to save model. Will have _epoch_epoch#.pt '
+                             'appended to it. Default ./gru_models',
+                        default='./gru_models')
+    parser.add_argument('--metrics_save_path', type=str,
+                        help='Path to save training metrics. Default '
+                             './gru_metrics.pt',
+                        default='./gru_metrics.pt')
     parser.add_argument('--build_vocab', type=bool,
                         help='Whether to build vocab from train set or to use '
                              'prebuilt vocab. If False, ensure the '
@@ -58,6 +66,7 @@ def main():
                              'from data set) or loaded from. Default '
                              './label_vocab.pickle.',
                         default='./label_vocab.pickle')
+
 
     args = parser.parse_args()
 
@@ -81,7 +90,7 @@ def main():
     criterion = BCEWithLogitsLoss()
 
     model = ModelUtil(model, args.batch_size, fields, device, optimizer,
-                      criterion, args.model_base_path, args.metrics_path)
+                      criterion, args.model_save_path, args.metrics_save_path)
 
     model.fit(train_iter, args.epochs, val_iter)
 
