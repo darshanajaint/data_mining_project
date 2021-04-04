@@ -36,14 +36,14 @@ def plot_training_data(state, val):
 
 
 def display_test_results(state, num_res):
-    print("Test accuracy: {:.6d}", state['accuracy'])
+    print(f"Test accuracy: {state['accuracy']:.6d}")
 
     class_pred = state['predictions']
     class_prob = state['probabilities']
 
     df = pd.DataFrame(zip(class_pred, class_prob), columns=['Class',
                                                             'Probability'])
-    df.head(num_res)
+    print(df.head(num_res))
 
 
 if __name__ == "__main__":

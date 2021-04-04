@@ -60,18 +60,23 @@ def main():
     parser.add_argument('--save_final_model', type=str2bool,
                         help='Whether to save the final model during '
                              'training. Default False.', default=False)
+    parser.add_argument('--test_after_train', type=str2bool,
+                        help='Whether to run the test set immediately after '
+                             'training.', default=False)
     parser.add_argument('--test', type=str2bool,
                         help='Whether to open the model in test mode or train '
                              'mode. Default False.', default=False)
     parser.add_argument('--test_csv', type=str,
                         help='Path to test data. Default empty. Must be set '
-                             'if test is True.', default='')
+                             'if test or test_after_train is True.', default='')
     parser.add_argument('--model_load_path', type=str,
                         help='Path from which to load a pretrained model. '
                              'Must beset if test is True.', default='')
     parser.add_argument('--test_metrics_save_path', type=str,
                         help='Path where the test metrics will be saved. Must '
-                             'be set if test is True.', default='')
+                             'be set if test or test_after_train is True. '
+                             'Default ./test_metrics.pt',
+                        default='./test_metrics.pt')
 
     args = parser.parse_args()
 
@@ -79,6 +84,10 @@ def main():
                       args.test_metrics_save_path == ''):
         raise ValueError('Cannot have empty test_csv or model_load_path '
                          'or test_metrics_save_path when testing.')
+    elif args.test_after_train and (args.test_csv == '' or
+                                    args.test_metrics_save_path == ''):
+        raise ValueError('Cannot have empty test_csv or '
+                         'test_metrics_save_path when testing after training.')
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
@@ -108,7 +117,7 @@ def main():
     else:
         model.load_model(args.model_load_path)
 
-    if args.test_csv != '':
+    if args.test_after_train or args.test:
         test_data = read_csv(args.test_csv)
         class_predictions = model.predict_class(test_data)
         class_probabilities = model.predict_prob(test_data)
