@@ -17,3 +17,6 @@
 
 # Ignore pycache files
 __pycache__
+
+# Ignore pdfs
+*.pdf
