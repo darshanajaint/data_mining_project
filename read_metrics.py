@@ -96,11 +96,16 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    metrics = read_file(args.metrics)
+    if args.training and args.test and args.best_model or \
+            ((args.training or args.test) and args.best_model):
+        raise ValueError("You must choose one of training, test, or best "
+                         "model.")
 
-    if args.training:
-        plot_training_data(metrics, args.validation)
-    elif args.test:
-        display_test_results(metrics, args.num_res)
-    elif args.best_model:
+    if args.best_model:
         determine_best_model(args.metrics)
+    else:
+        metrics = read_file(args.metrics)
+        if args.training:
+            plot_training_data(metrics, args.validation)
+        elif args.test:
+            display_test_results(metrics, args.num_res)
