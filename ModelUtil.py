@@ -52,7 +52,7 @@ class ModelUtil:
     def _accuracy(self, data_iterator):
         labels = get_labels(data_iterator, self.device)
         predictions = self._predict(data_iterator, predict_class=True)
-        return accuracy_score(labels, predictions)
+        return accuracy_score(labels, predictions), labels
 
     def predict_class(self, data):
         data_loader = get_data_iterator(data[0], data[1], self.fields,

@@ -2,12 +2,35 @@ import torch
 import argparse
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+from os.path import isfile, join
 
 from util import str2bool
 
 
 def read_file(file):
     return torch.load(file)
+
+
+def determine_best_model(path):
+    files = [f for f in os.listdir(path) if isfile(join(path, f))]
+
+    max_acc = -1
+    best_model = None
+    for file in files:
+        state = read_file(file)
+        try:
+            val_acc = min(state['validation_accuracy'])
+
+            if val_acc > max_acc:
+                max_acc = val_acc
+                best_model = file
+        except KeyError:
+            print("Cannot find validation accuracy in file {:s}. "
+                  "Exiting program...".format(file))
+            exit(1)
+
+    print(best_model)
 
 
 def plot_data(train, val, data_type):
@@ -39,11 +62,12 @@ def plot_training_data(state, val):
 def display_test_results(state, num_res):
     print(f"Test accuracy: {state['accuracy']:.6f}")
 
+    class_labels = state['labels']
     class_pred = state['predictions']
     class_prob = state['probabilities']
 
-    df = pd.DataFrame(zip(class_pred, class_prob), columns=['Class',
-                                                            'Probability'])
+    df = pd.DataFrame(zip(class_labels, class_pred, class_prob),
+                      columns=['True Labels', 'Predicted Class', 'Probability'])
     print(df.head(num_res))
 
 
@@ -64,6 +88,11 @@ if __name__ == "__main__":
                         help='How many test results to display - should be '
                              'less than the number of test instances.',
                         default=50)
+    parser.add_argument('--best_model', type=str2bool,
+                        help='Whether to determine the best model from among '
+                             'a directory of models. Pass the directory to '
+                             'metrics. Each model must have validation data.',
+                        default=False)
 
     args = parser.parse_args()
 
@@ -73,3 +102,5 @@ if __name__ == "__main__":
         plot_training_data(metrics, args.validation)
     elif args.test:
         display_test_results(metrics, args.num_res)
+    elif args.best_model:
+        determine_best_model(args.metrics)

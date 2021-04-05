@@ -10,7 +10,7 @@ import argparse
 from GRUModel import GRUModel
 from ModelUtil import ModelUtil
 from data_util import *
-from util import str2bool
+from util import str2bool, get_labels
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 import torch
@@ -122,9 +122,10 @@ def main():
         test_data = read_csv(args.test_csv)
         class_predictions = model.predict_class(test_data)
         class_probabilities = model.predict_prob(test_data)
-        test_accuracy = model.accuracy_score(test_data)
+        test_accuracy, test_labels = model.accuracy_score(test_data)
 
         state = {
+            'labels': test_labels,
             'predictions':  class_predictions,
             'probabilities': class_probabilities,
             'accuracy': test_accuracy
