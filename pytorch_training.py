@@ -95,34 +95,39 @@ def main():
     torch.manual_seed(SEED)
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
-
+    
     training_data = read_csv(args.train_csv, train_val_split=args.validation)
 
     fields, TEXT, _ = setup_fields(training_data, args.max_vocab_size)
-
+    
     model = GRUModel(input_size=args.input_size, hidden_size=args.hidden_size,
                      text_field=TEXT, dropout=args.dropout,
                      bidirectional=args.bidirectional)
     model.to(device)
-    optimizer = Adam(params=model.parameters(), lr=args.lr)
-    criterion = BCEWithLogitsLoss()
-    criterion.to(device)
-
-    model = ModelUtil(model, args.batch_size, fields, device, optimizer,
-                      criterion, args.model_save_path, args.metrics_save_path)
 
     if not args.test:
+        optimizer = Adam(params=model.parameters(), lr=args.lr)
+        criterion = BCEWithLogitsLoss()
+        criterion.to(device)
+        
+        model = ModelUtil(model, args.batch_size, fields, device, optimizer,
+                      criterion, args.model_save_path, args.metrics_save_path)
+    
+    
         model.fit(training_data, args.epochs, args.validation,
                   args.save_final_model)
     else:
+        model = ModelUtil(model, 128, fields, device, None,
+                      None, args.model_save_path, args.metrics_save_path)
+        
         model.load_model(args.model_load_path)
 
     if args.test_after_train or args.test:
         print(args.test_metrics_save_path)
         test_data = read_csv(args.test_csv)
-        class_predictions = model.predict_class(test_data)
-        class_probabilities = model.predict_prob(test_data)
-        test_accuracy, test_labels = model.accuracy_score(test_data)
+        class_predictions = model.predict_class(test_data, False)
+        class_probabilities = model.predict_prob(test_data, False)
+        test_accuracy, test_labels = model.accuracy_score(test_data, False)
 
         state = {
             'labels': test_labels,

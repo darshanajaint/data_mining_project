@@ -38,7 +38,7 @@ def read_csv(file, train_val_split=False):
         return df, val
 
 
-def get_data_iterator(train, val, fields, batch_size, device):
+def get_data_iterator(train, val, fields, batch_size, device, shuffle=True):
     train_ds = DataFrameDataset(train, fields)
     val_ds = DataFrameDataset(val, fields)
     iterator = data.BucketIterator.splits(
@@ -47,7 +47,7 @@ def get_data_iterator(train, val, fields, batch_size, device):
         device=device,
         sort_key=lambda x: len(x.text),
         sort=False,
-        shuffle=True,
+        shuffle=shuffle,
         sort_within_batch=True,
     )
     return iterator
