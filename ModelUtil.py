@@ -130,6 +130,7 @@ class ModelUtil:
             train_loss_epoch /= num_loop
             training_loss.append(train_loss_epoch)
             training_acc_epoch = self._accuracy(train_iterator)[0]
+            print(training_acc_epoch)
             training_accuracy.append(training_acc_epoch)
 
             print("Finished epoch {:d}\n"
