@@ -118,7 +118,7 @@ def main():
                   args.save_final_model)
     else:
         model = ModelUtil(model, 128, fields, device, None,
-                      None, args.model_save_path, args.metrics_save_path)
+                      None, None, None)
         
         model.load_model(args.model_load_path)
 
