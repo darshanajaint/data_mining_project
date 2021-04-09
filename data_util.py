@@ -31,7 +31,7 @@ def read_csv(file, train_val_split=False):
     le = LabelEncoder()
     df["Party"] = le.fit_transform(df["Party"].values)
 
-    train, val = train_test_split(df, test_size=0.1)
+    train, val = train_test_split(df, test_size=0.1, random_state=0)
     if train_val_split:
         return train, val
     else:
