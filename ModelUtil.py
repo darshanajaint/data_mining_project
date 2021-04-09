@@ -49,8 +49,8 @@ class ModelUtil:
         return self._accuracy(data_loader[0])
 
     def _accuracy(self, data_iterator):
-        predictions, labels = self._predict(data_iterator, predict_class=True)
-        return accuracy_score(labels, predictions), labels
+        preds, labels, probs = self._predict(data_iterator, predict_class=True)
+        return accuracy_score(labels, preds), labels, preds, probs
 
     def predict_class(self, data, shuffle=True):
         data_loader = get_data_iterator(data[0], data[1], self.fields,
@@ -67,17 +67,19 @@ class ModelUtil:
 
         pred = []
         labels = []
+        probs = []
         with torch.no_grad():
             for batch in iterator:
                 text = batch.text.to(self.device)
                 output = self.model(text)
                 output = torch.sigmoid(output)
+
+                probs += list(output.cpu().numpy())
                 if predict_class:
                     output = (output >= self.threshold).float()
-
-                labels += list(batch.labels.cpu().numpy())
+                labels += list(batch.label.cpu().numpy())
                 pred += list(output.cpu().numpy())
-        return pred, labels
+        return pred, labels, probs
 
     def _set_up_train_vars(self, data):
         train_iterator, val_iterator = get_data_iterator(

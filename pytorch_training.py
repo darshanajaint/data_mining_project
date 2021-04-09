@@ -125,14 +125,15 @@ def main():
     if args.test_after_train or args.test:
         print(args.test_metrics_save_path)
         test_data = read_csv(args.test_csv)
-        class_predictions = model.predict_class(test_data, False)
-        class_probabilities = model.predict_prob(test_data, False)
-        test_accuracy, test_labels = model.accuracy_score(test_data, False)
+        # class_predictions = model.predict_class(test_data, False)
+        # class_probabilities = model.predict_prob(test_data, False)
+        test_accuracy, test_labels, test_predictions, test_probabilities = \
+            model.accuracy_score(test_data, False)
 
         state = {
             'labels': test_labels,
-            'predictions':  class_predictions,
-            'probabilities': class_probabilities,
+            'predictions':  test_predictions,
+            'probabilities': test_probabilities,
             'accuracy': test_accuracy
         }
         model.save_metrics(state, args.test_metrics_save_path)
