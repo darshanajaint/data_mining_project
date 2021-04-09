@@ -158,7 +158,7 @@ class ModelUtil:
                 max_epoch = epoch
 
                 # Save best model so far
-                self.save_model(self.model_path))
+                self.save_model(self.model_path)
 
         state = {
             'training_accuracy': training_accuracy,
