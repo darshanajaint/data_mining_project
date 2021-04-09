@@ -13,7 +13,7 @@ def read_file(file):
 
 
 def determine_best_model(path):
-    files = [f for f in os.listdir(path) if isfile(join(path, f))]
+    files = [join(path, f) for f in os.listdir(path) if isfile(join(path, f))]
 
     max_acc = -1
     best_model = None
@@ -44,9 +44,13 @@ def plot_data(train, val, data_type):
         plt.legend()
 
     plt.xlabel("Epoch")
-    plt.ylabel("{:s} per batch".format(data_type))
+    if data_type == "accuracy":
+        plt.ylabel("Accuracy")
+    else:
+        plt.ylabel("Average loss per batch")
+        
     plt.title("Plot of training {:s}".format(data_type))
-    plt.savefig("training_{:s}.png".format(data_type))
+    plt.savefig("./Figures/training_{:s}.png".format(data_type))
 
 
 def plot_training_data(state, val):
@@ -59,7 +63,7 @@ def plot_training_data(state, val):
         plot_data(state['training_loss'], None, "loss")
 
 
-def display_test_results(state, num_res):
+def display_test_results(state, num_res, save_name):
     print(f"Test accuracy: {state['accuracy']:.6f}")
 
     class_labels = state['labels']
@@ -69,6 +73,10 @@ def display_test_results(state, num_res):
     df = pd.DataFrame(zip(class_labels, class_pred, class_prob),
                       columns=['True Labels', 'Predicted Class', 'Probability'])
     print(df.head(num_res))
+    
+    if save_name:
+        df.to_csv(save_name, index=False)
+        
 
 
 if __name__ == "__main__":
@@ -93,11 +101,18 @@ if __name__ == "__main__":
                              'a directory of models. Pass the directory to '
                              'metrics. Each model must have validation data.',
                         default=False)
+    parser.add_argument('--test_results_save_name', type=str,
+                        help='a csv save name to save predictions on the test set')
+    parser.add_argument('--model_stats', type=str,
+                        help='a pytorch file that has the true labels, predicctions, and probabilities')
 
     args = parser.parse_args()
+    
+    if args.best_model and not args.metrics:
+        raise ValueError("To choose a best model you must have a metrics path")
 
-    if args.training and args.test and args.best_model or \
-            ((args.training or args.test) and args.best_model):
+    
+    if not args.training and not args.test and not args.best_model:
         raise ValueError("You must choose one of training, test, or best "
                          "model.")
 
@@ -105,7 +120,8 @@ if __name__ == "__main__":
         determine_best_model(args.metrics)
     else:
         metrics = read_file(args.metrics)
+        model_stats = read_file(args.model_stats)
         if args.training:
             plot_training_data(metrics, args.validation)
         elif args.test:
-            display_test_results(metrics, args.num_res)
+            display_test_results(model_stats, args.num_res, args.test_results_save_name)

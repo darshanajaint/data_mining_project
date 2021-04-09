@@ -116,6 +116,9 @@ def main():
     
         model.fit(training_data, args.epochs, args.validation,
                   args.save_final_model)
+        
+        if args.test_after_train:
+            model.load_model(args.model_save_path)
     else:
         model = ModelUtil(model, 128, fields, device, None,
                       None, None, None)
