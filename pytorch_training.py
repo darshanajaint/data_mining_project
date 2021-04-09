@@ -10,7 +10,7 @@ import argparse
 from GRUModel import GRUModel
 from ModelUtil import ModelUtil
 from data_util import *
-from util import str2bool, get_labels
+from util import str2bool
 from torch.optim import Adam
 from torch.nn import BCEWithLogitsLoss
 import torch

@@ -3,7 +3,6 @@ import torch.optim as optim
 from torch.nn import BCEWithLogitsLoss
 
 from data_util import get_data_iterator
-from util import get_labels
 from sklearn.metrics import accuracy_score
 
 
@@ -50,24 +49,24 @@ class ModelUtil:
         return self._accuracy(data_loader[0])
 
     def _accuracy(self, data_iterator):
-        labels = get_labels(data_iterator, self.device)
-        predictions = self._predict(data_iterator, predict_class=True)
+        predictions, labels = self._predict(data_iterator, predict_class=True)
         return accuracy_score(labels, predictions), labels
 
     def predict_class(self, data, shuffle=True):
         data_loader = get_data_iterator(data[0], data[1], self.fields,
                                         self.batch_size, self.device, shuffle)
-        return self._predict(data_loader[0], True)
+        return self._predict(data_loader[0], True)[0]
 
     def predict_prob(self, data, shuffle=True):
         data_loader = get_data_iterator(data[0], data[1], self.fields,
                                         self.batch_size, self.device, shuffle)
-        return self._predict(data_loader[0], False)
+        return self._predict(data_loader[0], False)[0]
 
     def _predict(self, iterator, predict_class):
         self.model.eval()
 
         pred = []
+        labels = []
         with torch.no_grad():
             for batch in iterator:
                 text = batch.text.to(self.device)
@@ -76,8 +75,9 @@ class ModelUtil:
                 if predict_class:
                     output = (output >= self.threshold).float()
 
+                labels += list(batch.labels.cpu().numpy())
                 pred += list(output.cpu().numpy())
-        return pred
+        return pred, labels
 
     def _set_up_train_vars(self, data):
         train_iterator, val_iterator = get_data_iterator(
