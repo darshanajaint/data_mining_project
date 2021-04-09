@@ -75,7 +75,7 @@ class ModelUtil:
                 if predict_class:
                     output = (output >= self.threshold).float()
 
-                labels += list(batch.labels.cpu().numpy())
+                labels += list(batch.label.cpu().numpy())
                 pred += list(output.cpu().numpy())
         return pred, labels
 
