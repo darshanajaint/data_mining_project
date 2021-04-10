@@ -119,9 +119,9 @@ if __name__ == "__main__":
     if args.best_model:
         determine_best_model(args.metrics)
     else:
-        metrics = read_file(args.metrics)
-        model_stats = read_file(args.model_stats)
         if args.training:
+            metrics = read_file(args.metrics)
             plot_training_data(metrics, args.validation)
         elif args.test:
+            model_stats = read_file(args.model_stats)
             display_test_results(model_stats, args.num_res, args.test_results_save_name)
